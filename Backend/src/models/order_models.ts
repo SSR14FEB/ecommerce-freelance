@@ -7,7 +7,7 @@ interface order {
   price: number;
 }
 
-export interface orderInterface extends Document {
+ interface orderInterface extends Document {
   ordered_Id: order[];
   totalPrice: number;
   createdAt: Date;
@@ -42,4 +42,4 @@ const orderSchema = new Schema<orderInterface>(
   { timestamps: true }
 );
 
-export const Order = mongoose.model("Order", orderSchema);
+export const Order = mongoose.model<orderInterface>("Order", orderSchema);

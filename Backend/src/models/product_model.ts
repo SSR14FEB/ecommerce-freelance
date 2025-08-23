@@ -1,7 +1,7 @@
-import { Schema } from "mongoose";
+import { Document, Schema } from "mongoose";
 import mongoose from "mongoose";
 
-interface productInterface {
+interface productInterface extends Document {
   name: string;
   description: string;
   price: number;
@@ -13,7 +13,7 @@ interface productInterface {
   createdAt?: Date;
   updatedAt?: Date;
 }
-interface variantInterface {
+ interface variantInterface{
   image: string[];
   color: string;
   size: string;

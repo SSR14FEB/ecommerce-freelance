@@ -6,13 +6,12 @@ interface ItemInterface{
     quantity:number;
     price:number;
 }
-export interface cartInterface extends Document{
+interface cartInterface extends Document{
     cartItem:ItemInterface[];
     subTotal:number;
     createdAt:Date;
     updatedAt:Date;
 }
-
 const cartSchema = new Schema<cartInterface>({
     cartItem:{
         type:[{
@@ -35,3 +34,5 @@ const cartSchema = new Schema<cartInterface>({
         default:0
     }
 },{timestamps:true})
+
+export const Cart = mongoose.model<cartInterface>("Cart",cartSchema)
