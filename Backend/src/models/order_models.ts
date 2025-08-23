@@ -7,11 +7,29 @@ interface order {
   price: number;
 }
 
- interface orderInterface extends Document {
+interface orderInterface extends Document {
   ordered_Id: order[];
   totalPrice: number;
+  shipments: shipmentsInterface;
   createdAt: Date;
   updateAt: Date;
+}
+
+interface shipmentsInterface {
+  trackingId?: string;
+  carrier?: string;
+  status: "PENDING" | "SHIPPED" | "IN_TRANSIT" | "DELIVERED" | "CANCELLED";
+  shippedAt?: Date;
+  deliveredAt?: Date;
+  address: {
+    name: string;
+    phone: string;
+    street: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+  };
 }
 
 const orderSchema = new Schema<orderInterface>(
@@ -26,18 +44,39 @@ const orderSchema = new Schema<orderInterface>(
           quantity: {
             type: Number,
             default: 1,
-            min:1,
+            min: 1,
           },
           price: {
             type: Number,
           },
         },
-      ],default:[],
+      ],
+      default: [],
     },
-    totalPrice:{
-        type:Number,
-        default:0,
-    }
+    totalPrice: {
+      type: Number,
+      default: 0,
+    },
+    shipments: {
+      trackingId: { type: String },
+      carrier: { type: String },
+      status: {
+        type: String,
+        enum: ["PENDING", "SHIPPED", "IN_TRANSIT", "DELIVERED", "CANCELLED"],
+        default: "PENDING",
+      },
+      shippedAt: { type: Date },
+      deliveredAt: { type: Date },
+      address: {
+        name: { type: String, required: true },
+        phone: { type: String, required: true },
+        street: { type: String, required: true },
+        city: { type: String, required: true },
+        state: { type: String, required: true },
+        postalCode: { type: String, required: true },
+        country: { type: String, required: true },
+      },
+    },
   },
   { timestamps: true }
 );
