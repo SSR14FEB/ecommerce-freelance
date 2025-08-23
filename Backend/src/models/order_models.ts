@@ -21,15 +21,8 @@ interface shipmentsInterface {
   status: "PENDING" | "SHIPPED" | "IN_TRANSIT" | "DELIVERED" | "CANCELLED";
   shippedAt?: Date;
   deliveredAt?: Date;
-  address: {
-    name: string;
-    phone: string;
-    street: string;
-    city: string;
-    state: string;
-    postalCode: string;
-    country: string;
-  };
+  user:mongoose.Types.ObjectId
+  addressIndex: number;
 }
 
 const orderSchema = new Schema<orderInterface>(
@@ -67,14 +60,13 @@ const orderSchema = new Schema<orderInterface>(
       },
       shippedAt: { type: Date },
       deliveredAt: { type: Date },
-      address: {
-        name: { type: String, required: true },
-        phone: { type: String, required: true },
-        street: { type: String, required: true },
-        city: { type: String, required: true },
-        state: { type: String, required: true },
-        postalCode: { type: String, required: true },
-        country: { type: String, required: true },
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+      addressIndex: {
+        type: Number,
+        required: [true, "Address index is required"],
       },
     },
   },
