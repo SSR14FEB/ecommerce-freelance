@@ -11,7 +11,7 @@ interface AddressInterface {
   createdAt?: Date;
   updatedAt?: Date;
 }
-const addressSchema = new Schema<AddressInterface>(
+const AddressSchema = new Schema<AddressInterface>(
   {
     street: {
       type: String,
@@ -55,7 +55,7 @@ interface UserInterface extends Document {
   updatedAt?: Date;
 }
 
-const userSchema = new Schema<UserInterface>(
+const UserSchema = new Schema<UserInterface>(
   {
     name: {
       type: String,
@@ -105,7 +105,7 @@ const userSchema = new Schema<UserInterface>(
         message: `Email is already existed`,
       },
     },
-    addresses: { type: [addressSchema], default: [] },
+    addresses: { type: [AddressSchema], default: [] },
     cart: {
       type: [mongoose.Schema.Types.ObjectId],
       ref: "Product",
@@ -145,4 +145,4 @@ const userSchema = new Schema<UserInterface>(
   { timestamps: true }
 );
 
-export const User = mongoose.model<UserInterface>("User", userSchema);
+export const User = mongoose.model<UserInterface>("User", UserSchema);

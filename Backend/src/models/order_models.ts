@@ -1,21 +1,14 @@
 import mongoose, { Document } from "mongoose";
 import { Schema } from "mongoose";
 
-interface order {
+interface Order {
   product_Id: mongoose.Types.ObjectId;
   quantity: number;
   price: number;
 }
 
-interface orderInterface extends Document {
-  ordered_Id: order[];
-  totalPrice: number;
-  shipments: shipmentsInterface;
-  createdAt: Date;
-  updateAt: Date;
-}
 
-interface shipmentsInterface {
+interface ShipmentsInterface {
   trackingId?: string;
   carrier?: string;
   status: "PENDING" | "SHIPPED" | "IN_TRANSIT" | "DELIVERED" | "CANCELLED";
@@ -25,7 +18,15 @@ interface shipmentsInterface {
   addressIndex: number;
 }
 
-const orderSchema = new Schema<orderInterface>(
+interface OrderInterface extends Document {
+  ordered_Id: Order[];
+  totalPrice: number;
+  shipments: ShipmentsInterface;
+  createdAt: Date;
+  updateAt: Date;
+}
+
+const OrderSchema = new Schema<OrderInterface>(
   {
     ordered_Id: {
       type: [
@@ -73,4 +74,4 @@ const orderSchema = new Schema<orderInterface>(
   { timestamps: true }
 );
 
-export const Order = mongoose.model<orderInterface>("Order", orderSchema);
+export const Order = mongoose.model<OrderInterface>("Order", OrderSchema);

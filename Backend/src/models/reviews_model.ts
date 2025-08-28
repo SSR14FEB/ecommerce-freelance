@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { Schema } from "mongoose";
 import { Product } from "./product_model";
 
-interface productReviewsInterface{
+interface ProductReviewsInterface{
     user:mongoose.Types.ObjectId;
     product:mongoose.Types.ObjectId;
     rating:number;
@@ -11,7 +11,7 @@ interface productReviewsInterface{
     updatedAt?:Date
   }
   
-  const productReviewsSchema = new Schema<productReviewsInterface>({
+  const ProductReviewsSchema = new Schema<ProductReviewsInterface>({
     user:{
       type:mongoose.Schema.Types.ObjectId,
       ref:"User"
@@ -30,4 +30,4 @@ interface productReviewsInterface{
     }
   },{timestamps:true})
 
-  export const ProductReview = mongoose.model<productReviewsInterface>("ProductReview",productReviewsSchema)
+  export const ProductReview = mongoose.model<ProductReviewsInterface>("ProductReview",ProductReviewsSchema)

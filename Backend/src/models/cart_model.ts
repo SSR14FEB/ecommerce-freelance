@@ -6,13 +6,13 @@ interface ItemInterface{
     quantity:number;
     price:number;
 }
-interface cartInterface extends Document{
+interface CartInterface extends Document{
     cartItem:ItemInterface[];
     subTotal:number;
     createdAt:Date;
     updatedAt:Date;
 }
-const cartSchema = new Schema<cartInterface>({
+const CartSchema = new Schema<CartInterface>({
     cartItem:{
         type:[{
             product_Id:{
@@ -35,4 +35,4 @@ const cartSchema = new Schema<cartInterface>({
     }
 },{timestamps:true})
 
-export const Cart = mongoose.model<cartInterface>("Cart",cartSchema)
+export const Cart = mongoose.model<CartInterface>("Cart",CartSchema)

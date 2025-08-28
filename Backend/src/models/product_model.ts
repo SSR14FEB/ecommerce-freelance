@@ -1,19 +1,7 @@
 import { Document, Schema } from "mongoose";
 import mongoose from "mongoose";
 
-interface productInterface extends Document {
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  stock: number;
-  variant: variantInterface[];
-  images: string[];
-  isFeatured: boolean;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
- interface variantInterface{
+interface VariantInterface{
   image: string[];
   color: string;
   size: string;
@@ -23,7 +11,20 @@ interface productInterface extends Document {
   updatedAt?: Date;
 }
 
-const variantSchema = new Schema<variantInterface>(
+interface ProductInterface extends Document {
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  stock: number;
+  variant: VariantInterface[];
+  images: string[];
+  isFeatured: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+const VariantSchema = new Schema<VariantInterface>(
   {
     image: {
       type: [String],
@@ -49,7 +50,7 @@ const variantSchema = new Schema<variantInterface>(
   { timestamps: true }
 );
 
-const productSchema = new Schema<productInterface>(
+const ProductSchema = new Schema<ProductInterface>(
   {
     name: {
       type: String,
@@ -72,7 +73,7 @@ const productSchema = new Schema<productInterface>(
       required: true,
     },
     variant: {
-      type: [variantSchema],
+      type: [VariantSchema],
       default: [],
     },
     images: { type: [String], required: true },
@@ -81,7 +82,7 @@ const productSchema = new Schema<productInterface>(
   { timestamps: true }
 );
 
-export const Product = mongoose.model<productInterface>(
+export const Product = mongoose.model<ProductInterface>(
   "Product",
-  productSchema
+  ProductSchema
 );

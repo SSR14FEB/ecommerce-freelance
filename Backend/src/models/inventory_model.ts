@@ -1,7 +1,7 @@
 import mongoose, { Document } from "mongoose";
 import {Schema} from 'mongoose'
 
-interface variantInterface {
+interface VariantInterface {
     image: string[];
     color: string;
     size: string;
@@ -9,14 +9,14 @@ interface variantInterface {
     stock: number;
 }
 
-interface inventoryInterface extends Document{
+interface InventoryInterface extends Document{
     name:String;
-    variant:variantInterface[];
+    variant:VariantInterface[];
     createdAt?: Date;
     updatedAt?: Date;
 }
 
-const inventorySchema = new Schema<inventoryInterface>({
+const InventorySchema = new Schema<InventoryInterface>({
     name:{
         type:String,
         required:[true, "Product name is required"]
@@ -49,4 +49,4 @@ const inventorySchema = new Schema<inventoryInterface>({
     timestamps:true
 })
 
-export const Inventory = mongoose.model<inventoryInterface>("Inventory",inventorySchema)
+export const Inventory = mongoose.model<InventoryInterface>("Inventory",InventorySchema)
