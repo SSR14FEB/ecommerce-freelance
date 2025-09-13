@@ -1,7 +1,8 @@
 import { Document, Schema } from "mongoose";
 import mongoose from "mongoose";
 import { Product } from "./product_model";
-
+import jwt, { Secret, SignOptions } from "jsonwebtoken"
+import { json } from "express";
 interface AddressInterface {
   street: string;
   city: string;
@@ -37,7 +38,7 @@ const AddressSchema = new Schema<AddressInterface>(
   { timestamps: true }
 );
 
-interface UserInterface extends Document {
+interface UserInterface  {
   name: string;
   avatar?: string;
   contactNumber: string;
@@ -55,7 +56,12 @@ interface UserInterface extends Document {
   updatedAt?: Date;
 }
 
-const UserSchema = new Schema<UserInterface>(
+interface IUserDocument extends UserInterface,Document{
+  GenerateAccessToken():string;
+  GenerateRefreshToken():string;
+}
+
+const UserSchema = new Schema<IUserDocument>(
   {
     name: {
       type: String,
@@ -145,4 +151,40 @@ const UserSchema = new Schema<UserInterface>(
   { timestamps: true }
 );
 
-export const User = mongoose.model<UserInterface>("User", UserSchema);
+UserSchema.methods.GenerateAccessToken = function(this:IUserDocument){
+  const secretKey:Secret = process.env.ACCESS_TOKEN_SECRET_KEY as string
+  const expiresIn:string = process.env.ACCESS_TOKEN_EXPIRE_IN ||"1hr"
+  
+  const payload = {
+    _id:(this._id as mongoose.Types.ObjectId).toString(),
+    email:this.email,
+    contactNumber:this.contactNumber
+  }
+
+  const options:SignOptions = {expiresIn: expiresIn as SignOptions["expiresIn"]} 
+  try {
+    return  jwt.sign(payload,secretKey,options)
+  } catch (error) {
+    throw new Error("Failed to generate Access Token")
+  }
+}
+
+UserSchema.methods.GenerateRefreshToken = function(this:IUserDocument){
+  const secretKey:Secret = process.env.REFRESH_TOKEN_SECRET_KEY as string
+  const expiresIn:string = process.env.REFRESH_TOKEN_EXPIRE_IN ||"1hr"
+  
+  const payload = {
+    _id:(this._id as mongoose.Types.ObjectId).toString()
+  }
+
+  const options:SignOptions = {expiresIn:expiresIn as SignOptions["expiresIn"]}
+
+  try {
+    return jwt.sign(payload,secretKey,options)
+  } catch (error) {
+    throw new Error("Failed to generate Access Token")
+  }
+
+}
+
+export const User = mongoose.model<IUserDocument>("User", UserSchema);
