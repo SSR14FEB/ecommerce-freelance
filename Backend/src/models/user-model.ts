@@ -136,10 +136,6 @@ const UserSchema = new Schema<IUserDocument>(
       type: String,
       // required: true,
     },
-    accessToken: {
-      type: String,
-      // required: true,
-    },
     otp: {
       type: String,
     },
@@ -161,7 +157,7 @@ UserSchema.methods.GenerateAccessToken = function (this: IUserDocument):string {
 
   const payload = {
     _id: (this._id as mongoose.Types.ObjectId).toString(),
-    email: this.email,
+    email: this.email||this.otp,
     contactNumber: this.contactNumber,
   };
 
