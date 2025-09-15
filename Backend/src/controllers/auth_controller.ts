@@ -16,6 +16,11 @@ return res.status(200)
 .json(new ApiResponse(200,`OTP verification successful. You can now access your account`,true))
 })
 
+const resendOtpController = asyncHandler(async(req:Request, res:Response)=>{
+    const otp = resendOtp(req.body)
+    return res.status(200)
+    .json(new ApiResponse(200,"Otp resend successful"))
+})
 export{
     sendOtpController,
     verifyOtpController

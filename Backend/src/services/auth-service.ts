@@ -37,20 +37,19 @@ const sendOtp = async (data:UserOtpInput) => {
 };
 
 const verifyOtp = async (data: UserOtpInput) => {
-
   const {contactNumber, otp} = data
-
   const user: IUserDocument | null = await User.findOne({
     contactNumber:contactNumber,
   });
   if (!(user?.otp == otp)) {
     throw new ApiError(401, "OTP does not match. Please try again.", "");
   }
-  user.isVerified = true
-  await user.save()
   if (user.name && user.email) {
     return user;
   }
+  user.isVerified = true
+  await user.save()
+  return user
 };
 type SendOtp = typeof sendOtp
 const resendOtp:SendOtp = sendOtp
