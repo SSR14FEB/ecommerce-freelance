@@ -1,0 +1,61 @@
+import { User } from "../models/user-model";
+import { IUserDocument } from "../models/user-model";
+import { sendSMS } from "./send-message-service";
+import { ApiError } from "../utils/apiError";
+declare global {
+  namespace Express {
+    interface Request {
+      user?: IUserDocument;
+    }
+  }
+}
+
+interface UserOtpInput {
+  contactNumber: string;
+  otp: string;
+}
+
+const sendOtp = async (data:UserOtpInput) => {
+  try {
+    const contactNumber:string = data.contactNumber;
+    let user: IUserDocument | null = await User.findOne({
+      contactNumber: contactNumber,
+    });
+    if (!user) {
+      user = new User({ contactNumber });
+    }
+    user.GenerateOtp();
+    const otp = String(user.otp);
+    await sendSMS(contactNumber, otp);
+    await user?.save();
+    return user
+
+  } catch (error) {
+    console.log(error);
+    throw new Error("Failed to generate OTP");
+  }
+};
+
+const verifyOtp = async (data: UserOtpInput) => {
+
+  const {contactNumber, otp} = data
+
+  const user: IUserDocument | null = await User.findOne({
+    contactNumber:contactNumber,
+  });
+  if (!(user?.otp == otp)) {
+    throw new ApiError(401, "OTP does not match. Please try again.", "");
+  }
+  user.isVerified = true
+  await user.save()
+  if (user.name && user.email) {
+    return user;
+  }
+};
+type SendOtp = typeof sendOtp
+const resendOtp:SendOtp = sendOtp
+export { 
+    sendOtp,
+    verifyOtp,
+    resendOtp
+};

@@ -13,4 +13,7 @@ app.use(express.json({limit:'16kb'})); // Set a limit for JSON payloads
 app.use(express.urlencoded({extended: true, limit:'16kb'})); // Set a limit for URL-encoded payloads    
 app.use(express.static('public'));
 
+import auth from"./routes/auth-routes"
+
+app.use("/api/user-authentication",auth)
 export default app;

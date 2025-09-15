@@ -1,7 +1,7 @@
 import { Document, Schema } from "mongoose";
 import mongoose from "mongoose";
-import { Product } from "./product_model";
-import jwt, { Secret, SignOptions } from "jsonwebtoken"
+import { Product } from "./product-model";
+import jwt, { Secret, SignOptions } from "jsonwebtoken";
 import { json } from "express";
 interface AddressInterface {
   street: string;
@@ -38,7 +38,7 @@ const AddressSchema = new Schema<AddressInterface>(
   { timestamps: true }
 );
 
-interface UserInterface  {
+interface UserInterface {
   name: string;
   avatar?: string;
   contactNumber: string;
@@ -50,22 +50,22 @@ interface UserInterface  {
   isVerified: boolean;
   refreshToken: string;
   accessToken: string;
-  otp?: number;
+  otp?: string;
   otpExpire?: Date;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-interface IUserDocument extends UserInterface,Document{
-  GenerateAccessToken():string;
-  GenerateRefreshToken():string;
+export  interface IUserDocument extends UserInterface, Document {
+  GenerateOtp():void;
+  GenerateAccessToken(): string;
+  GenerateRefreshToken(): string;
 }
 
 const UserSchema = new Schema<IUserDocument>(
   {
     name: {
       type: String,
-      required: true,
     },
     avatar: {
       type: String,
@@ -79,7 +79,7 @@ const UserSchema = new Schema<IUserDocument>(
         {
           validator: function (num: string) {
             const number = num.replace(/^0/, "");
-            return /^[6-9]\d{9}$/.test(number);
+            return /^(\+91)?[6-9]\d{9}$/.test(number);
           },
           message: `number is not valid`,
         },
@@ -96,7 +96,7 @@ const UserSchema = new Schema<IUserDocument>(
     },
     email: {
       type: String,
-      required: [true, "Email is required"],
+      // required: [true, "Email is required"],
       lowercase: true,
       unique: true,
       trim: true,
@@ -134,14 +134,14 @@ const UserSchema = new Schema<IUserDocument>(
     },
     refreshToken: {
       type: String,
-      required: true,
+      // required: true,
     },
     accessToken: {
       type: String,
-      required: true,
+      // required: true,
     },
     otp: {
-      type: Number,
+      type: String,
     },
     otpExpire: {
       type: Date,
@@ -151,40 +151,47 @@ const UserSchema = new Schema<IUserDocument>(
   { timestamps: true }
 );
 
-UserSchema.methods.GenerateAccessToken = function(this:IUserDocument){
-  const secretKey:Secret = process.env.ACCESS_TOKEN_SECRET_KEY as string
-  const expiresIn:string = process.env.ACCESS_TOKEN_EXPIRE_IN ||"1hr"
-  
-  const payload = {
-    _id:(this._id as mongoose.Types.ObjectId).toString(),
-    email:this.email,
-    contactNumber:this.contactNumber
-  }
-
-  const options:SignOptions = {expiresIn: expiresIn as SignOptions["expiresIn"]} 
-  try {
-    return  jwt.sign(payload,secretKey,options)
-  } catch (error) {
-    throw new Error("Failed to generate Access Token")
-  }
+UserSchema.methods.GenerateOtp = function():void{
+  this.otp = Math.floor(100000+Math.random()*900000)
 }
 
-UserSchema.methods.GenerateRefreshToken = function(this:IUserDocument){
-  const secretKey:Secret = process.env.REFRESH_TOKEN_SECRET_KEY as string
-  const expiresIn:string = process.env.REFRESH_TOKEN_EXPIRE_IN ||"1hr"
-  
-  const payload = {
-    _id:(this._id as mongoose.Types.ObjectId).toString()
-  }
+UserSchema.methods.GenerateAccessToken = function (this: IUserDocument):string {
+  const secretKey: Secret = process.env.ACCESS_TOKEN_SECRET_KEY as string;
+  const expiresIn: string = process.env.ACCESS_TOKEN_EXPIRE_IN || "1hr";
 
-  const options:SignOptions = {expiresIn:expiresIn as SignOptions["expiresIn"]}
+  const payload = {
+    _id: (this._id as mongoose.Types.ObjectId).toString(),
+    email: this.email,
+    contactNumber: this.contactNumber,
+  };
+
+  const options: SignOptions = {
+    expiresIn: expiresIn as SignOptions["expiresIn"],
+  };
+  try {
+    return jwt.sign(payload, secretKey, options);
+  } catch (error) {
+    throw new Error("Failed to generate Access Token");
+  }
+};
+
+UserSchema.methods.GenerateRefreshToken = function (this: IUserDocument):string {
+  const secretKey: Secret = process.env.REFRESH_TOKEN_SECRET_KEY as string;
+  const expiresIn: string = process.env.REFRESH_TOKEN_EXPIRE_IN || "1hr";
+
+  const payload = {
+    _id: (this._id as mongoose.Types.ObjectId).toString(),
+  };
+
+  const options: SignOptions = {
+    expiresIn: expiresIn as SignOptions["expiresIn"],
+  };
 
   try {
-    return jwt.sign(payload,secretKey,options)
+    return jwt.sign(payload, secretKey, options);
   } catch (error) {
-    throw new Error("Failed to generate Access Token")
+    throw new Error("Failed to generate Access Token");
   }
-
-}
+};
 
 export const User = mongoose.model<IUserDocument>("User", UserSchema);

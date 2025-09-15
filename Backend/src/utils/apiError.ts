@@ -1,12 +1,12 @@
-class apiError extends Error{
+class ApiError extends Error{
     statuscode?:number;
     stack?: string | undefined;
     error?:string[];
     success?:boolean 
     constructor(
+        statuscode:number|500,
         message:string = "Something went wrong",
-        statuscode:number,
-        stack:string,
+        stack:string|"",
         error:string[] = [],
         success:boolean = false
     ){
@@ -24,4 +24,4 @@ class apiError extends Error{
     }
 }
 
-export {apiError}
+export {ApiError}

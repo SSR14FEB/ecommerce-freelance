@@ -1,4 +1,4 @@
-class apiResponse{
+class ApiResponse{
     statuscode:number;
     message:string;
     success:boolean;
@@ -16,4 +16,4 @@ class apiResponse{
     }
 }
 
-export {apiResponse}
+export {ApiResponse}

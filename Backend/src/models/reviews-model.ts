@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { Schema } from "mongoose";
-import { Product } from "./product_model";
+import { Product } from "./product-model";
 
 interface ProductReviewsInterface{
     user:mongoose.Types.ObjectId;
