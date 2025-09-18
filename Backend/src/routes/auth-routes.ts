@@ -1,11 +1,15 @@
-import express,{Router} from "express"
-import router from "./otp-routes"
-import { sendOtpController, verifyOtpController } from "../controllers/auth_controller"
-import { resendOtp } from "../services/auth-service"
+import express, { Router } from "express";
+import {
+  sendOtpController,
+  verifyOtpController,
+  resendOtpController,
+  logOutController,
+} from "../controllers/auth_controller";
 
-const route = Router()
+const router = Router();
 
-router.patch("/sendOtp",sendOtpController)
-router.patch("/verifyOtp",verifyOtpController)
-router.patch("/resendOtp",resendOtp)
-export default router
+router.patch("/sendOtp", sendOtpController);
+router.patch("/verifyOtp", verifyOtpController);
+router.patch("/resendOtp", resendOtpController);
+router.patch("/logout/:id", logOutController);
+export default router;

@@ -2,7 +2,12 @@ import { asyncHandler } from "../utils/asyncHandler";
 import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
 import { Request, Response } from "express";
-import { sendOtp, verifyOtp, resendOtp } from "../services/auth-service";
+import {
+  sendOtp,
+  verifyOtp,
+  resendOtp,
+  logOut,
+} from "../services/auth-service";
 
 import mongoose from "mongoose";
 import { IUserDocument, User } from "../models/user-model";
@@ -77,4 +82,22 @@ const resendOtpController = asyncHandler(
     return res.status(200).json(new ApiResponse(200, "Otp resend successful"));
   }
 );
-export { sendOtpController, verifyOtpController };
+
+const logOutController = asyncHandler(async (req: Request, res: Response) => {
+  const {id} = req.params;
+  await logOut(id as String);
+
+  const options: CookieOptions = {
+    httpOnly: true,
+    secure: true,
+  };
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "User.logged out successful"));
+});
+export {
+  sendOtpController,
+  verifyOtpController,
+  resendOtpController,
+  logOutController,
+};

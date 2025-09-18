@@ -2,6 +2,7 @@ import { User } from "../models/user-model";
 import { IUserDocument } from "../models/user-model";
 import { sendSMS } from "./send-message-service";
 import { ApiError } from "../utils/apiError";
+import mongoose from "mongoose";
 declare global {
   namespace Express {
     interface Request {
@@ -15,7 +16,7 @@ interface UserOtpInput {
   otp: string;
 }
 
-const sendOtp = async (data:UserOtpInput) => {
+const sendOtp = async (data:UserOtpInput):Promise<IUserDocument> => {
   try {
     const contactNumber:string = data.contactNumber;
     let user: IUserDocument | null = await User.findOne({
@@ -36,7 +37,7 @@ const sendOtp = async (data:UserOtpInput) => {
   }
 };
 
-const verifyOtp = async (data: UserOtpInput) => {
+const verifyOtp = async (data: UserOtpInput):Promise<IUserDocument> => {
   const {contactNumber, otp} = data
   const user: IUserDocument | null = await User.findOne({
     contactNumber:contactNumber,
@@ -53,8 +54,21 @@ const verifyOtp = async (data: UserOtpInput) => {
 };
 type SendOtp = typeof sendOtp
 const resendOtp:SendOtp = sendOtp
+
+const logOut = async(user_Id:String)=>{
+
+  await User.findByIdAndUpdate(user_Id,{
+    $unset:{
+      refreshToken:true
+    }
+   },{
+    new:true
+   })
+}
+
 export { 
     sendOtp,
     verifyOtp,
-    resendOtp
+    resendOtp,
+    logOut
 };
