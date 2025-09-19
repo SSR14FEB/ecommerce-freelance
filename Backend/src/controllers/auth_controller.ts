@@ -70,7 +70,8 @@ const verifyOtpController = asyncHandler(
         new ApiResponse(
           200,
           `OTP verification successful. You can now access your account`,
-          true
+          true,
+          {user}
         )
       );
   }

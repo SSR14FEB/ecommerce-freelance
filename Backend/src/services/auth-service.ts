@@ -52,6 +52,7 @@ const verifyOtp = async (data: UserOtpInput):Promise<IUserDocument> => {
   await user.save()
   return user
 };
+
 type SendOtp = typeof sendOtp
 const resendOtp:SendOtp = sendOtp
 
