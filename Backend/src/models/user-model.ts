@@ -152,12 +152,12 @@ UserSchema.methods.GenerateOtp = function():void{
 }
 
 UserSchema.methods.GenerateAccessToken = function (this: IUserDocument):string {
-  const secretKey: Secret = process.env.ACCESS_TOKEN_SECRET_KEY as string;
+  const secretKey: Secret = process.env.ACCESS_TOKEN_SECRET_KEY as Secret;
   const expiresIn: string = process.env.ACCESS_TOKEN_EXPIRE_IN || "1hr";
 
   const payload = {
     _id: (this._id as mongoose.Types.ObjectId).toString(),
-    email: this.email||this.otp,
+    otp:this.otp,
     contactNumber: this.contactNumber,
   };
 
@@ -172,7 +172,7 @@ UserSchema.methods.GenerateAccessToken = function (this: IUserDocument):string {
 };
 
 UserSchema.methods.GenerateRefreshToken = function (this: IUserDocument):string {
-  const secretKey: Secret = process.env.REFRESH_TOKEN_SECRET_KEY as string;
+  const secretKey: Secret = process.env.REFRESH_TOKEN_SECRET_KEY as Secret;
   const expiresIn: string = process.env.REFRESH_TOKEN_EXPIRE_IN || "1hr";
 
   const payload = {

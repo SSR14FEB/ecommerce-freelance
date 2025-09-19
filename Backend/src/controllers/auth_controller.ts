@@ -84,8 +84,8 @@ const resendOtpController = asyncHandler(
 );
 
 const logOutController = asyncHandler(async (req: Request, res: Response) => {
-  const {id} = req.params;
-  await logOut(id as String);
+  const {id}= req.user as IUserDocument
+  await logOut(id as string);
 
   const options: CookieOptions = {
     httpOnly: true,
