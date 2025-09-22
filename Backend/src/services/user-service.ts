@@ -1,29 +1,44 @@
 import { User } from "../models/user-model";
 import { IUserDocument } from "../models/user-model";
 import { ApiError } from "../utils/apiError";
-import { ApiResponse } from "../utils/apiResponse";
 
-const signup = async(user_id:string, body:IUserDocument):Promise<IUserDocument>=>{
-    console.log(body)
-   const {name, avatar, email, addresses} = body
-   if([name,email].some((field)=>field.trim()=="")){
-    throw new ApiError(400,"All fields are required","")
-   }
-   const user:IUserDocument|null = await User.findByIdAndUpdate(user_id,{
-    $set:{
-        name:name,
-        email:email,
-        avatar:avatar,
-        addresses:addresses
-    }},{
-        new:true
-    })
-   if (!user) {
+const signup = async (
+  user_id: string,
+  body: IUserDocument
+): Promise<IUserDocument> => {
+const { name, email, addresses } = body;
+  if ([name, email].some((field) => field.trim() == "")) {
+    throw new ApiError(400, "All fields are required", "");
+  }
+  const user: IUserDocument | null = await User.findById({ _id: user_id });
+  if (!user) {
     throw new ApiError(404, "User not found", "");
-    }
-   await user?.save()
-   return user;
-}
-export{
-    signup
-}
+  }
+  user.name = name.trim().toLocaleLowerCase();
+  user.email = email.trim();
+  user.addresses = addresses;
+  user.save()
+  
+  return user;
+};
+
+const editProfile = async (
+  user_id: string,
+  body: IUserDocument
+): Promise<IUserDocument> => {
+  const { name, email, contactNumber, addresses } = body;
+  const user: IUserDocument | null = await User.findById({ _id: user_id });
+
+  if (!user) {
+    throw new ApiError(404, "User not found", "");
+  }
+  user.name = name.trim().toLocaleLowerCase() || user.name;
+  user.email = email.trim() || user.email;
+  user.contactNumber = contactNumber.trim() || user.contactNumber;
+  user.addresses = addresses.length > 0 ? addresses : user.addresses;
+
+  await user.save();
+  return user;
+};
+
+export { signup, editProfile };

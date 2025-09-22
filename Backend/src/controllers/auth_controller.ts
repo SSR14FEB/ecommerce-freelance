@@ -71,7 +71,7 @@ const verifyOtpController = asyncHandler(
           200,
           `OTP verification successful. You can now access your account`,
           true,
-          {user}
+          user
         )
       );
   }

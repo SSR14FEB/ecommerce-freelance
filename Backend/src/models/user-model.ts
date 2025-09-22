@@ -40,7 +40,6 @@ const AddressSchema = new Schema<AddressInterface>(
 
 interface UserInterface {
   name: string;
-  avatar?: string;
   contactNumber: string;
   email: string;
   addresses: AddressInterface[];
@@ -65,9 +64,6 @@ export  interface IUserDocument extends UserInterface, Document {
 const UserSchema = new Schema<IUserDocument>(
   {
     name: {
-      type: String,
-    },
-    avatar: {
       type: String,
     },
     contactNumber: {
@@ -144,7 +140,21 @@ const UserSchema = new Schema<IUserDocument>(
       expires: 300,
     },
   },
-  { timestamps: true }
+  { 
+    timestamps: true,
+    versionKey:"version",
+    minimize:true,
+    toJSON:{
+      virtuals:true,
+      transform:(_doc:any,ret:any):any=>{
+        delete ret.__v;
+        delete ret.refreshToken;
+        delete ret.otp;
+        return ret
+      }
+    },
+    toObject:{virtuals:true}
+   }
 );
 
 UserSchema.methods.GenerateOtp = function():void{
