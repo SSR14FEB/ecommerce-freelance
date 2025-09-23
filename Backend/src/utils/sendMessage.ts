@@ -20,4 +20,4 @@ export async function sendSMS(to: string, otp: string): Promise<void> {
   }
 }
 
-// Example usage
+// sms utility
