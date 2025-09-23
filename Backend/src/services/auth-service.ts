@@ -1,8 +1,8 @@
 import { User } from "../models/user-model";
 import { IUserDocument } from "../models/user-model";
-import { sendSMS } from "./send-message-service";
+import { sendSMS } from "../utils/sendMessage";
 import { ApiError } from "../utils/apiError";
-import mongoose from "mongoose";
+
 declare global {
   namespace Express {
     interface Request {

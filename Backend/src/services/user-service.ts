@@ -2,6 +2,7 @@ import { User } from "../models/user-model";
 import { IUserDocument } from "../models/user-model";
 import { ApiError } from "../utils/apiError";
 
+
 const signup = async (
   user_id: string,
   body: IUserDocument
@@ -26,7 +27,7 @@ const editProfile = async (
   user_id: string,
   body: IUserDocument
 ): Promise<IUserDocument> => {
-  const { name, email, contactNumber, addresses } = body;
+  const { name, email, addresses} = body;
   const user: IUserDocument | null = await User.findById({ _id: user_id });
 
   if (!user) {
@@ -34,7 +35,6 @@ const editProfile = async (
   }
   user.name = name.trim().toLocaleLowerCase() || user.name;
   user.email = email.trim() || user.email;
-  user.contactNumber = contactNumber.trim() || user.contactNumber;
   user.addresses = addresses.length > 0 ? addresses : user.addresses;
 
   await user.save();
