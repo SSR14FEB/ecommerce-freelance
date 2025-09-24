@@ -22,6 +22,7 @@ const sendOtp = async (data:UserOtpInput):Promise<IUserDocument> => {
     let user: IUserDocument | null = await User.findOne({
       contactNumber: contactNumber,
     });
+    console.log("user",user)
     if (!user) {
       user = new User({ contactNumber });
     }

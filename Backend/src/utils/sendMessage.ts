@@ -1,4 +1,5 @@
 import twilio, { Twilio } from "twilio";
+import { ApiError } from "./apiError";
 
 const accountSid: string = process.env.TWILIO_ACCOUNT_SID!;
 const authToken: string = process.env.TWILIO_AUTH_TOKEN!;
@@ -17,7 +18,7 @@ export async function sendSMS(to: string, otp: string): Promise<void> {
     console.log("✅ SMS sent successfully! SID:", message.sid);
   } catch (err: any) {
     console.error("❌ Error sending SMS:", err.message || err);
+    throw new ApiError(403,"Bad Request","")
   }
 }
 
-// sms utility
