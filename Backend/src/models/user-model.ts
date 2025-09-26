@@ -50,6 +50,7 @@ interface UserInterface {
   refreshToken: string;
   accessToken: string;
   otp?: string;
+  otpMaxAttempts:number;
   otpExpire?: Date;
   createdAt?: Date;
   updatedAt?: Date;
@@ -130,14 +131,18 @@ const UserSchema = new Schema<IUserDocument>(
     },
     refreshToken: {
       type: String,
-      // required: true,
     },
     otp: {
       type: String,
     },
+    otpMaxAttempts:{
+      type:Number,
+      max:5,
+      default:0
+    },
     otpExpire: {
       type: Date,
-      expires: 300,
+      index:{expires:300}
     },
   },
   { 
