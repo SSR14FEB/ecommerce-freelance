@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { Product } from "./product-model";
 import jwt, { Secret, SignOptions } from "jsonwebtoken";
 import { json } from "express";
+import { ThisMonthPage } from "twilio/lib/rest/api/v2010/account/usage/record/thisMonth";
 interface AddressInterface {
   street: string;
   city: string;
@@ -50,8 +51,10 @@ interface UserInterface {
   refreshToken: string;
   accessToken: string;
   otp?: string;
-  otpMaxAttempts:number;
-  otpExpire?: Date;
+  otpNextAttempt?:Date;
+  otpMaxAttempts?:number;
+  otpBlockUntil?: Date;
+  docExpire?: Date;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -135,12 +138,20 @@ const UserSchema = new Schema<IUserDocument>(
     otp: {
       type: String,
     },
+    otpNextAttempt:{
+      type:Date,
+      default:new Date(Date.now()+12*1000)
+    },
     otpMaxAttempts:{
       type:Number,
       max:5,
       default:0
     },
-    otpExpire: {
+    otpBlockUntil:{
+      type:Date,
+      default:null
+    },
+    docExpire: {
       type: Date,
       index:{expires:300}
     },
@@ -165,6 +176,16 @@ const UserSchema = new Schema<IUserDocument>(
 UserSchema.methods.GenerateOtp = function():void{
   this.otp = Math.floor(100000+Math.random()*900000)
 }
+
+UserSchema.pre("save",function(){ 
+  this.docExpire = new Date(Date.now() + 900 * 1000);
+  
+  if(this.isVerified){
+    this.otpNextAttempt = undefined
+    this.otpBlockUntil = undefined
+    this.otpMaxAttempts = undefined
+  }
+})
 
 UserSchema.methods.GenerateAccessToken = function (this: IUserDocument):string {
   const secretKey: Secret = process.env.ACCESS_TOKEN_SECRET_KEY as Secret;
