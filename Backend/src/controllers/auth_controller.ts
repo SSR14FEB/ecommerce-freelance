@@ -11,13 +11,19 @@ import {
 
 import mongoose from "mongoose";
 import { IUserDocument, User } from "../models/user-model";
-import AccessToken from "twilio/lib/jwt/AccessToken";
 
 interface CookieOptions {
   httpOnly: boolean;
   secure: boolean;
 }
 
+/**
+ * Generate JWT access and refresh tokens for a user.
+ *
+ * @param userId - MongoDB user ObjectId
+ * @returns Object containing accessToken and refreshToken
+ * @throws ApiError if user not found or token generation fails
+ */
 const generateTokens = async (
   userId: mongoose.Types.ObjectId
 ): Promise<{ accessToken: string; refreshToken: string }> => {
@@ -39,12 +45,33 @@ const generateTokens = async (
   }
 };
 
+/**
+ * Controller: Send OTP to user's mobile number.
+ *
+ * Flow:
+ * 1. Calls sendOtp service to generate & send OTP
+ * 2. Returns success response with masked contact number
+ *
+ * @route POST /auth/send-otp
+ */
 const sendOtpController = asyncHandler(async (req: Request, res: Response) => {
   const user = await sendOtp(req.body);
   return res
     .status(200)
     .json(new ApiResponse(200, `OTP sent to the ${user.contactNumber}`, true));
 });
+
+
+/**
+ * Controller: Verify OTP entered by user.
+ *
+ * Flow:
+ * 1. Calls verifyOtp service to validate OTP
+ * 2. Generates JWT access & refresh tokens on success
+ * 3. Stores tokens in httpOnly, secure cookies
+ *
+ * @route POST /auth/verify-otp
+ */
 
 const verifyOtpController = asyncHandler(
   async (req: Request, res: Response) => {
@@ -77,6 +104,16 @@ const verifyOtpController = asyncHandler(
   }
 );
 
+/**
+ * Controller: Resend OTP to user.
+ *
+ * Flow:
+ * 1. Calls resendOtp service
+ * 2. Returns confirmation response
+ *
+ * @route POST /auth/resend-otp
+ */
+
 const resendOtpController = asyncHandler(
   async (req: Request, res: Response) => {
     const otp = await resendOtp(req.body);
@@ -84,6 +121,15 @@ const resendOtpController = asyncHandler(
   }
 );
 
+/**
+ * Controller: Logout user by clearing tokens.
+ *
+ * Flow:
+ * 1. Calls logOut service to remove refreshToken from DB
+ * 2. Clears client-side tokens (via cookies)
+ *
+ * @route POST /auth/logout
+ */
 const logOutController = asyncHandler(async (req: Request, res: Response) => {
   const {id}= req.user as IUserDocument
   await logOut(id as string);

@@ -17,7 +17,16 @@ interface UserOtpInput {
 }
 
 const MAX_OTP_ATTEMPTS = 5;
-
+/**
+ * Handle OTP attempt logic for a given user.
+ * 
+ * - Increments OTP attempt counter
+ * - If attempts exceed MAX_OTP_ATTEMPTS → user is blocked for 5 minutes
+ * 
+ * @param otp - The OTP entered by the user
+ * @param user - The user document
+ * @throws ApiError if maximum attempts exceeded
+ */
 const handleOtpAttempts = async (otp: string, user: IUserDocument) => {
   if (user?.otpMaxAttempts ?? 0 >= MAX_OTP_ATTEMPTS) {
     user.otpBlockUntil = new Date(Date.now() + 300 * 1000);
@@ -29,6 +38,19 @@ const handleOtpAttempts = async (otp: string, user: IUserDocument) => {
   await user.save();
 };
 
+/**
+ * Send OTP to user.
+ * 
+ * Flow:
+ * 1. Find user by contact number (create if not exists)
+ * 2. Validate block / cool-down restrictions
+ * 3. Generate OTP and save user state
+ * 4. Send OTP via SMS gateway
+ * 
+ * @param data - Object containing user contact number
+ * @returns Updated user document with OTP state
+ * @throws ApiError if blocked/cool-down rules violated
+ */
 const sendOtp = async (data: UserOtpInput): Promise<IUserDocument> => {
   // This (send otp), service is to generate and send otp to the user numbers
   const contactNumber: string = data.contactNumber;
@@ -65,6 +87,20 @@ const sendOtp = async (data: UserOtpInput): Promise<IUserDocument> => {
   await user?.save();
   return user;
 };
+
+/**
+ * Verify OTP entered by user.
+ * 
+ * Flow:
+ * 1. Find user by contact number
+ * 2. Validate block / expiry / attempt rules
+ * 3. Match entered OTP with stored OTP
+ * 4. Mark user as verified if successful
+ * 
+ * @param data - Object containing contact number and otp
+ * @returns Verified user document
+ * @throws ApiError for invalid OTP, expired OTP, or blocked users
+ */
 
 const verifyOtp = async (data: UserOtpInput): Promise<IUserDocument> => {
   // This (verify otp), service is to verify otp by using user mobile number and otp
@@ -105,9 +141,22 @@ const verifyOtp = async (data: UserOtpInput): Promise<IUserDocument> => {
   return user;
 };
 
+/**
+ * Resend OTP to user (same as sendOtp).
+ * 
+ * @param data - Object containing user contact number
+ */
 type SendOtp = typeof sendOtp;
 const resendOtp: SendOtp = sendOtp; // This (resend otp), service is use to resend opt
 
+/**
+ * Log out user.
+ * 
+ * Clears user refresh token from DB.
+ * Tokens stored in cookies will also be cleared on client side.
+ * 
+ * @param user_Id - User ID
+ */
 const logOut = async (user_Id: string) => {
   // This (logout), service is use to clear user refresh and access token from  ( Browser cookies )
   await User.findByIdAndUpdate(
