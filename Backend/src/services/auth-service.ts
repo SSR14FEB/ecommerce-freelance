@@ -19,34 +19,36 @@ interface UserOtpInput {
 const MAX_OTP_ATTEMPTS = 5;
 /**
  * Handle OTP attempt logic for a given user.
- * 
+ *
  * - Increments OTP attempt counter
  * - If attempts exceed MAX_OTP_ATTEMPTS → user is blocked for 5 minutes
- * 
+ *
  * @param otp - The OTP entered by the user
  * @param user - The user document
  * @throws ApiError if maximum attempts exceeded
  */
-const handleOtpAttempts = async (otp: string, user: IUserDocument) => {
-  if (user?.otpMaxAttempts ?? 0 >= MAX_OTP_ATTEMPTS) {
+const handleOtpAttempts = async (user: IUserDocument) => {
+  console.log("i am here ")
+  console.log("user", user?.otpMaxAttempts);
+  user.otpMaxAttempts =  (user.otpMaxAttempts ?? 0)+1
+  console.log("user",user);
+  if ((user.otpMaxAttempts ?? 0) >= MAX_OTP_ATTEMPTS) {
     user.otpBlockUntil = new Date(Date.now() + 300 * 1000);
     await user.save();
     throw new ApiError(429, "Maximum OTP attempts exceeded", "");
   }
-
-  user.otpMaxAttempts = (user.otpMaxAttempts ?? 0) + 1;
   await user.save();
 };
 
 /**
  * Send OTP to user.
- * 
+ *
  * Flow:
  * 1. Find user by contact number (create if not exists)
  * 2. Validate block / cool-down restrictions
  * 3. Generate OTP and save user state
  * 4. Send OTP via SMS gateway
- * 
+ *
  * @param data - Object containing user contact number
  * @returns Updated user document with OTP state
  * @throws ApiError if blocked/cool-down rules violated
@@ -68,7 +70,10 @@ const sendOtp = async (data: UserOtpInput): Promise<IUserDocument> => {
       ""
     );
   }
-  if (user?.otpMaxAttempts ?? 0 > MAX_OTP_ATTEMPTS) {
+  if(user.otpMaxAttempts == undefined){
+    user.otpMaxAttempts = 0
+  }
+  if (user?.otpMaxAttempts >=MAX_OTP_ATTEMPTS) {
     throw new ApiError(429, "Maximum OTP attempts exceeded.", "");
   }
   if ((user?.otpNextAttempt?.getTime() ?? 0) > Date.now()) {
@@ -90,13 +95,13 @@ const sendOtp = async (data: UserOtpInput): Promise<IUserDocument> => {
 
 /**
  * Verify OTP entered by user.
- * 
+ *
  * Flow:
  * 1. Find user by contact number
  * 2. Validate block / expiry / attempt rules
  * 3. Match entered OTP with stored OTP
  * 4. Mark user as verified if successful
- * 
+ *
  * @param data - Object containing contact number and otp
  * @returns Verified user document
  * @throws ApiError for invalid OTP, expired OTP, or blocked users
@@ -121,13 +126,16 @@ const verifyOtp = async (data: UserOtpInput): Promise<IUserDocument> => {
     );
   }
 
-  await handleOtpAttempts(otp as string, user);
+  await handleOtpAttempts(user);
 
   if (!user?.isVerified && Date.now() > (user?.docExpire?.getTime() ?? 0)) {
     throw new ApiError(400, "OTP expired", "");
   }
+  const isOtpValidated: boolean = await user.validateOtp(otp as string);
 
-  if (!(user?.otp == otp)) {
+  console.log(isOtpValidated);
+
+  if (!isOtpValidated) {
     throw new ApiError(401, "OTP does not match. Please try again.", "");
   }
 
@@ -143,7 +151,7 @@ const verifyOtp = async (data: UserOtpInput): Promise<IUserDocument> => {
 
 /**
  * Resend OTP to user (same as sendOtp).
- * 
+ *
  * @param data - Object containing user contact number
  */
 type SendOtp = typeof sendOtp;
@@ -151,10 +159,10 @@ const resendOtp: SendOtp = sendOtp; // This (resend otp), service is use to rese
 
 /**
  * Log out user.
- * 
+ *
  * Clears user refresh token from DB.
  * Tokens stored in cookies will also be cleared on client side.
- * 
+ *
  * @param user_Id - User ID
  */
 const logOut = async (user_Id: string) => {

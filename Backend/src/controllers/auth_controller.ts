@@ -54,6 +54,7 @@ const generateTokens = async (
  *
  * @route POST /auth/send-otp
  */
+
 const sendOtpController = asyncHandler(async (req: Request, res: Response) => {
   const user = await sendOtp(req.body);
   return res
@@ -142,6 +143,7 @@ const logOutController = asyncHandler(async (req: Request, res: Response) => {
     .status(200)
     .json(new ApiResponse(200, "User.logged out successful"));
 });
+
 export {
   sendOtpController,
   verifyOtpController,

@@ -1,9 +1,8 @@
 import { Document, Schema } from "mongoose";
 import mongoose from "mongoose";
-import { Product } from "./product-model";
 import jwt, { Secret, SignOptions } from "jsonwebtoken";
-import { json } from "express";
-import { ThisMonthPage } from "twilio/lib/rest/api/v2010/account/usage/record/thisMonth";
+import bcrypt from "bcryptjs"
+
 interface AddressInterface {
   street: string;
   city: string;
@@ -63,6 +62,7 @@ export  interface IUserDocument extends UserInterface, Document {
   GenerateOtp():void;
   GenerateAccessToken(): string;
   GenerateRefreshToken(): string;
+  validateOtp(otp:string):boolean;
 }
 
 const UserSchema = new Schema<IUserDocument>(
@@ -170,22 +170,48 @@ const UserSchema = new Schema<IUserDocument>(
       }
     },
     toObject:{virtuals:true}
-   }
+  }
 );
+
+UserSchema.pre("save", async function(next){
+ try {
+   if(this.isModified("otp") && this.otp){
+     const salt :string|number = await bcrypt.genSalt(10)
+     this.otp = await bcrypt.hash(this.otp as string,salt)
+    }
+    next();
+ } catch (error) {
+    throw new Error("Error 500 something went wrong while hashing otp")
+ }
+}) 
+
+UserSchema.pre("save", function(next){
+ try {
+   this.docExpire = new Date(Date.now() + 900 * 1000);
+   if(this.isVerified){
+     this.otpNextAttempt = undefined; 
+     this.otpBlockUntil = undefined;
+     this.otpMaxAttempts = 0;
+  }
+  next();
+ } catch (error) {
+  console.log(error)
+  throw new Error("Error 500 something went wrong while verifying user")
+ }
+})
+
+UserSchema.methods.validateOtp = async function(otp:string):Promise<boolean>{
+ try {
+   return await bcrypt.compare(otp, this.otp);
+ } catch (error) {
+  throw new Error ("Error 500 something went wrong while comparing otp");
+   return false; // Ensure a boolean value is always returned
+ }
+}
 
 UserSchema.methods.GenerateOtp = function():void{
   this.otp = Math.floor(100000+Math.random()*900000)
 }
-
-UserSchema.pre("save",function(){ 
-  this.docExpire = new Date(Date.now() + 900 * 1000);
-  
-  if(this.isVerified){
-    this.otpNextAttempt = undefined
-    this.otpBlockUntil = undefined
-    this.otpMaxAttempts = undefined
-  }
-})
 
 UserSchema.methods.GenerateAccessToken = function (this: IUserDocument):string {
   const secretKey: Secret = process.env.ACCESS_TOKEN_SECRET_KEY as Secret;
@@ -193,7 +219,6 @@ UserSchema.methods.GenerateAccessToken = function (this: IUserDocument):string {
 
   const payload = {
     _id: (this._id as mongoose.Types.ObjectId).toString(),
-    otp:this.otp,
     contactNumber: this.contactNumber,
   };
 
