@@ -53,7 +53,7 @@ interface UserInterface {
   otpNextAttempt?:Date;
   otpMaxAttempts?:number;
   otpBlockUntil?: Date;
-  docExpire?: Date;
+  docExpire?: Date|null;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -163,7 +163,7 @@ const UserSchema = new Schema<IUserDocument>(
     toJSON:{
       virtuals:true,
       transform:(_doc:any,ret:any):any=>{
-        delete ret.__v;
+        delete ret.version;
         delete ret.refreshToken;
         delete ret.otp;
         return ret
@@ -189,6 +189,7 @@ UserSchema.pre("save", function(next){
  try {
    this.docExpire = new Date(Date.now() + 900 * 1000);
    if(this.isVerified){
+     this.docExpire = undefined;
      this.otpNextAttempt = undefined; 
      this.otpBlockUntil = undefined;
      this.otpMaxAttempts = 0;

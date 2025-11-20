@@ -34,6 +34,7 @@
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/mongoose": "^5.11.96",
-    "@types/nodemon": "^1.19.6"
+    "@types/nodemon": "^1.19.6",
+    "nodemon": "^3.1.11"
   }
 }

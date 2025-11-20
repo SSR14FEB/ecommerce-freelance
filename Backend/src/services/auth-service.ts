@@ -88,7 +88,8 @@ const sendOtp = async (data: UserOtpInput): Promise<IUserDocument> => {
   user.otpNextAttempt = new Date(Date.now() + 30 * 1000);
 
   const otp = String(user.otp);
-  await sendSMS(contactNumber, otp);
+  console.log(otp)
+  // await sendSMS(contactNumber, otp);
   await user?.save();
   return user;
 };
@@ -142,10 +143,24 @@ const verifyOtp = async (data: UserOtpInput): Promise<IUserDocument> => {
   if (user.name && user.email) {
     return user;
   }
-  user.isVerified = true;
-  user.otp = undefined;
-  user.docExpire = undefined;
-  await user.save();
+  
+
+  // user.isVerified = true;
+  // user.otp = undefined;
+  // user.docExpire = null;
+  
+  await User.findOneAndUpdate({_id:user._id},{
+    $set:{
+      isVerified:true,
+    },
+    $unset:{
+      otp:true,
+      docExpire:true
+    }
+  },{
+      new:true
+    })
+  
   return user;
 };
 
