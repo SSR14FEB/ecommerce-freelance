@@ -144,19 +144,10 @@ const verifyOtp = async (data: UserOtpInput): Promise<IUserDocument> => {
     return user;
   }
   
-
-  // user.isVerified = true;
-  // user.otp = undefined;
-  // user.docExpire = null;
-  
   await User.findOneAndUpdate({_id:user._id},{
     $set:{
       isVerified:true,
     },
-    $unset:{
-      otp:true,
-      docExpire:true
-    }
   },{
       new:true
     })
@@ -185,6 +176,9 @@ const logOut = async (user_Id: string) => {
   await User.findByIdAndUpdate(
     user_Id,
     {
+      $set:{
+        isVerified:false
+      },
       $unset: {
         refreshToken: true,
       },

@@ -190,6 +190,7 @@ UserSchema.pre("save", function(next){
    this.docExpire = new Date(Date.now() + 900 * 1000);
    if(this.isVerified){
      this.docExpire = undefined;
+     this.otp = undefined
      this.otpNextAttempt = undefined; 
      this.otpBlockUntil = undefined;
      this.otpMaxAttempts = 0;
