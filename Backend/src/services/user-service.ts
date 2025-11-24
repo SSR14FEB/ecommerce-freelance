@@ -1,5 +1,5 @@
 import { User } from "../models/user-model";
-import { IUserDocument } from "../models/user-model";
+import { IUserDocument } from "../types/models/user-types";
 import { ApiError } from "../utils/apiError";
 
 const signup = async (

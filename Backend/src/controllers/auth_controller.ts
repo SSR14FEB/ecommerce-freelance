@@ -10,7 +10,8 @@ import {
 } from "../services/auth-service";
 
 import mongoose from "mongoose";
-import { IUserDocument, User } from "../models/user-model";
+import { User } from "../models/user-model";
+import { IUserDocument } from "../types/models/user-types";
 
 interface CookieOptions {
   httpOnly: boolean;

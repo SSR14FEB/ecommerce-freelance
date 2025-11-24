@@ -15,7 +15,9 @@ app.use(express.static('public'));
 
 import auth from "./routes/auth-routes"
 import user from "./routes/user-routes"
+import product from "./routes/product-routes"
 
 app.use("/api/user-authentication",auth)
 app.use("/api/user",user)
+app.use("/api/product",product)
 export default app;
