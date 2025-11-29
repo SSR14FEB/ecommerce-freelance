@@ -9,16 +9,18 @@ interface VariantInterface{
   stock: number;
   createdAt?: Date;
   updatedAt?: Date;
+  discount:number;
 }
 
-interface ProductInterface extends Document {
-  name: string;
+export interface ProductInterface extends Document {
+  productName: string;
   description: string;
   price: number;
   category: string;
   stock: number;
   variant: VariantInterface[];
   images: string[];
+  seller:mongoose.Types.ObjectId
   isFeatured: boolean;
   createdAt?: Date;
   updatedAt?: Date;
@@ -52,7 +54,7 @@ const VariantSchema = new Schema<VariantInterface>(
 
 const ProductSchema = new Schema<ProductInterface>(
   {
-    name: {
+    productName: {
       type: String,
       required: true,
     },
@@ -76,8 +78,11 @@ const ProductSchema = new Schema<ProductInterface>(
       type: [VariantSchema],
       default: [],
     },
-    images: { type: [String], required: true },
     isFeatured: { type: Boolean, default: false },
+    seller:{
+      type:mongoose.Schema.Types.ObjectId,
+      ref:"User"
+    }
   },
   { timestamps: true }
 );

@@ -77,6 +77,7 @@ const sendOtpController = asyncHandler(async (req: Request, res: Response) => {
 
 const verifyOtpController = asyncHandler(
   async (req: Request, res: Response) => {
+    
     const user: IUserDocument = await verifyOtp(req.body);
     if (!user) {
       throw new ApiError(404, "User not found", "");

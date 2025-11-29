@@ -22,12 +22,14 @@ interface UserInterface {
   refreshToken: string;
   accessToken: string;
   otp?: string;
-  otpNextAttempt?:Date;
+  otpExpire?:Date|null;
+  otpNextAttempt?:Date|null;
   otpMaxAttempts?:number;
-  otpBlockUntil?: Date;
+  otpBlockUntil?: Date|null;
   docExpire?: Date|null;
   createdAt?: Date;
   updatedAt?: Date;
+  role:string
 }
 
 interface IUserDocument extends UserInterface, Document {

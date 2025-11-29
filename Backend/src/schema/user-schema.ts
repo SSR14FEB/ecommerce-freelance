@@ -1,5 +1,5 @@
-import mongoose,{ Document, Schema } from "mongoose";
-import {AddressInterface, IUserDocument} from "../types/models/user-types"
+import mongoose, { Document, Schema } from "mongoose";
+import { AddressInterface, IUserDocument } from "../types/models/user-types";
 export const AddressSchema = new Schema<AddressInterface>(
   {
     street: {
@@ -56,7 +56,6 @@ export const UserSchema = new Schema<IUserDocument>(
     },
     email: {
       type: String,
-      // required: [true, "Email is required"],
       lowercase: true,
       unique: true,
       trim: true,
@@ -70,6 +69,7 @@ export const UserSchema = new Schema<IUserDocument>(
         },
         message: `Email is already existed`,
       },
+      default: undefined,
     },
     addresses: { type: [AddressSchema], default: [] },
     cart: {
@@ -87,6 +87,11 @@ export const UserSchema = new Schema<IUserDocument>(
       ref: "Product",
       default: [],
     },
+    role: {
+      type: String,
+      enum: ["buyer", "seller", "admin"],
+      default: "buyer",
+    },
     isVerified: {
       type: Boolean,
       required: true,
@@ -98,37 +103,41 @@ export const UserSchema = new Schema<IUserDocument>(
     otp: {
       type: String,
     },
-    otpNextAttempt:{
-      type:Date,
-      default:new Date(Date.now()+12*1000)
+    otpExpire: {
+      type: Date,
+      default: new Date(Date.now() + 30 * 1000),
     },
-    otpMaxAttempts:{
-      type:Number,
-      max:5,
-      default:0
+    otpNextAttempt: {
+      type: Date,
+      default: new Date(Date.now() + 12 * 1000),
     },
-    otpBlockUntil:{
-      type:Date,
-      default:null
+    otpMaxAttempts: {
+      type: Number,
+      max: 5,
+      default: 0,
+    },
+    otpBlockUntil: {
+      type: Date,
+      default: null,
     },
     docExpire: {
       type: Date,
-      index:{expires:300}
+      Date: null,
     },
   },
-  { 
+  {
     timestamps: true,
-    versionKey:"version",
-    minimize:true,
-    toJSON:{
-      virtuals:true,
-      transform:(_doc:any,ret:any):any=>{
+    versionKey: "version",
+    minimize: true,
+    toJSON: {
+      virtuals: true,
+      transform: (_doc: any, ret: any): any => {
         delete ret.version;
         delete ret.refreshToken;
         delete ret.otp;
-        return ret
-      }
+        return ret;
+      },
     },
-    toObject:{virtuals:true}
+    toObject: { virtuals: true },
   }
 );

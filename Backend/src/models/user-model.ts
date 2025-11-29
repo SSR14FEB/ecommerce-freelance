@@ -18,13 +18,10 @@ UserSchema.pre("save", async function(next){
 
 UserSchema.pre("save", function(next){
  try {
-   this.docExpire = new Date(Date.now() + 900 * 1000);
    if(this.isVerified){
-     this.docExpire = undefined;
-     this.otp = undefined
-     this.otpNextAttempt = undefined; 
-     this.otpBlockUntil = undefined;
      this.otpMaxAttempts = 0;
+     this.otpNextAttempt = undefined;
+     this.otpExpire = undefined
   }
   next();
  } catch (error) {
@@ -35,6 +32,7 @@ UserSchema.pre("save", function(next){
 
 UserSchema.methods.validateOtp = async function(otp:string):Promise<boolean>{
  try {
+  console.log("in bcrypt",otp)
    return await bcrypt.compare(otp, this.otp);
  } catch (error) {
   throw new Error ("Error 500 something went wrong while comparing otp");

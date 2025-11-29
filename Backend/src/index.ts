@@ -1,6 +1,7 @@
 import app from './app'
 import dbConnection from './database/index'
 import dotenv from 'dotenv'
+import "./utils/dbCleaner"
 
 dotenv.config({
    path:'./.env'
