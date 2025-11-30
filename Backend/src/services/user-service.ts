@@ -17,7 +17,7 @@ const signup = async (
   user.name = name.trim().toLocaleLowerCase();
   user.email = email.trim();
   user.addresses = addresses;
-  user.save();
+  await user.save();
 
   return user;
 };
