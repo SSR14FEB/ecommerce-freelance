@@ -68,29 +68,35 @@ const sendOtp = async (data: UserOtpInput): Promise<IUserDocument> => {
       ""
     );
   }
+
   if (user.otpMaxAttempts == undefined) {
-    user.otpMaxAttempts = 0;
+      user.otpMaxAttempts = 0;
   }
+  
+  if(Date.now()>(user?.otpBlockUntil?.getTime() ?? 0)){
+    user.otpMaxAttempts = 0
+  }
+
   if (user?.otpMaxAttempts >= MAX_OTP_ATTEMPTS) {
     throw new ApiError(429, "Maximum OTP attempts exceeded.", "");
   }
+
   if ((user?.otpNextAttempt?.getTime() ?? 0) > Date.now()) {
     throw new ApiError(
       429,
-      "Too many attempts. Please try after 30 second.",
+      "Too many attempts. Please try after 60 second.",
       ""
     );
   }
 
   user.GenerateOtp();
-  user.otpNextAttempt = new Date(Date.now() + 30 * 1000);
+  user.otpNextAttempt = new Date(Date.now() + 60* 1000);
 
   if (!user.name) {
-    console.log("user", user.name);
-    user.docExpire = new Date(Date.now() + 30 * 1000);
+    user.docExpire = new Date(Date.now() + 60 * 1000);
   }
 
-  user.otpExpire = new Date(Date.now() + 30 * 1000);
+  user.otpExpire = new Date(Date.now() + 60 * 1000);
   const otp = String(user.otp);
   console.log(otp);
   // await sendSMS(contactNumber, otp);
@@ -135,9 +141,6 @@ const verifyOtp = async (data: UserOtpInput): Promise<IUserDocument> => {
   const isOtpValidated: boolean = await user.validateOtp(otp as string);
 
   if (Date.now() > (user?.otpExpire?.getTime() ?? 0)) {
-    console.log("Current timestamp:", typeof Date.now());
-    console.log("OTP expiry timestamp:", typeof user?.otpExpire?.getTime());
-    console.log("OTP expired here");
     throw new ApiError(400, "OTP expired", "");
   }
 
