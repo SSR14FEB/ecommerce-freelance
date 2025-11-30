@@ -122,7 +122,7 @@ export const UserSchema = new Schema<IUserDocument>(
     },
     docExpire: {
       type: Date,
-      Date: null,
+      default: null,
     },
   },
   {
