@@ -28,8 +28,8 @@ const MAX_OTP_ATTEMPTS = 5;
  * @throws ApiError if maximum attempts exceeded
  */
 const handleOtpAttempts = async (user: IUserDocument) => {
-  user.otpMaxAttempts =  (user.otpMaxAttempts ?? 0)+1
-  console.log("user",user);
+  user.otpMaxAttempts = (user.otpMaxAttempts ?? 0) + 1;
+  console.log("user", user);
   if ((user.otpMaxAttempts ?? 0) >= MAX_OTP_ATTEMPTS) {
     user.otpBlockUntil = new Date(Date.now() + 300 * 1000);
     await user.save();
@@ -68,8 +68,8 @@ const sendOtp = async (data: UserOtpInput): Promise<IUserDocument> => {
       ""
     );
   }
-  if(user.otpMaxAttempts == undefined){
-    user.otpMaxAttempts = 0
+  if (user.otpMaxAttempts == undefined) {
+    user.otpMaxAttempts = 0;
   }
   if (user?.otpMaxAttempts >= MAX_OTP_ATTEMPTS) {
     throw new ApiError(429, "Maximum OTP attempts exceeded.", "");
@@ -84,13 +84,15 @@ const sendOtp = async (data: UserOtpInput): Promise<IUserDocument> => {
 
   user.GenerateOtp();
   user.otpNextAttempt = new Date(Date.now() + 30 * 1000);
-  if(!user.name){
-    console.log("user",user.name)
+
+  if (!user.name) {
+    console.log("user", user.name);
     user.docExpire = new Date(Date.now() + 30 * 1000);
   }
-  user.otpExpire = new Date(Date.now()+ 30 * 1000)
+
+  user.otpExpire = new Date(Date.now() + 30 * 1000);
   const otp = String(user.otp);
-  console.log(otp)
+  console.log(otp);
   // await sendSMS(contactNumber, otp);
   await user?.save();
   return user;
@@ -128,39 +130,29 @@ const verifyOtp = async (data: UserOtpInput): Promise<IUserDocument> => {
       ""
     );
   }
-  
-  
+
   await handleOtpAttempts(user);
   const isOtpValidated: boolean = await user.validateOtp(otp as string);
 
-if (Date.now() > (user?.otpExpire?.getTime()??0)) {
-    console.log("Current timestamp:", typeof(Date.now()));
-    console.log("OTP expiry timestamp:", typeof(user?.otpExpire?.getTime()));
+  if (Date.now() > (user?.otpExpire?.getTime() ?? 0)) {
+    console.log("Current timestamp:", typeof Date.now());
+    console.log("OTP expiry timestamp:", typeof user?.otpExpire?.getTime());
     console.log("OTP expired here");
     throw new ApiError(400, "OTP expired", "");
-}
+  }
 
-  
   if (!isOtpValidated) {
     throw new ApiError(401, "OTP does not match. Please try again.", "");
   }
+  user.isVerified = true;
+  user.otp = "";
+  user.otpMaxAttempts = 0;
+  user.otpBlockUntil = undefined;
+  user.otpExpire = undefined;
+  user.otpNextAttempt = undefined;
+  user.docExpire = undefined;
+  await user.save();
 
-  await User.findByIdAndUpdate({_id:user._id},{
-    $set:{
-      isVerified:true,
-    },
-    $unset:{
-      otp:true,
-      otpMaxAttempts:true,
-      otpBlockUntil:true,
-      otpExpire:true,
-      otpNextAttempt:true,
-      docExpire:true
-    }
-  },{
-      new:true
-    })
-  
   return user;
 };
 
@@ -181,13 +173,13 @@ const resendOtp: SendOtp = sendOtp; // This (resend otp), service is use to rese
  * @param user_Id - User ID
  */
 const logOut = async (user_Id: string) => {
-  console.log("i am in logout")
+  console.log("i am in logout");
   // This (logout), service is use to clear user refresh and access token from  ( Browser cookies )
   await User.findByIdAndUpdate(
     user_Id,
     {
-      $set:{
-        isVerified:false
+      $set: {
+        isVerified: false,
       },
       $unset: {
         refreshToken: true,

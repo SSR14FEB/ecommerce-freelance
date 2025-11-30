@@ -1,5 +1,11 @@
 import mongoose,{Document} from "mongoose";
 
+export enum role{
+BUYER = "buyer",
+SELLER = "seller",
+ADMIN = "admin"
+}
+
 interface AddressInterface { 
   street: string;
   city: string;
@@ -29,7 +35,7 @@ interface UserInterface {
   docExpire?: Date|null;
   createdAt?: Date;
   updatedAt?: Date;
-  role:string
+  userRole:role //enum
 }
 
 interface IUserDocument extends UserInterface, Document {

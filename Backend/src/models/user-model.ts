@@ -21,7 +21,6 @@ UserSchema.pre("save", function(next){
    if(this.isVerified){
      this.otpMaxAttempts = 0;
      this.otpNextAttempt = undefined;
-     this.otpExpire = undefined
   }
   next();
  } catch (error) {

@@ -1,5 +1,5 @@
 import mongoose, { Document, Schema } from "mongoose";
-import { AddressInterface, IUserDocument } from "../types/models/user-types";
+import { AddressInterface, IUserDocument, role } from "../types/models/user-types";
 export const AddressSchema = new Schema<AddressInterface>(
   {
     street: {
@@ -87,10 +87,10 @@ export const UserSchema = new Schema<IUserDocument>(
       ref: "Product",
       default: [],
     },
-    role: {
+    userRole: {
       type: String,
-      enum: ["buyer", "seller", "admin"],
-      default: "buyer",
+      enum: Object.values(role),
+      default:role.BUYER
     },
     isVerified: {
       type: Boolean,
@@ -105,11 +105,11 @@ export const UserSchema = new Schema<IUserDocument>(
     },
     otpExpire: {
       type: Date,
-      default: new Date(Date.now() + 30 * 1000),
+      default: null
     },
     otpNextAttempt: {
       type: Date,
-      default: new Date(Date.now() + 12 * 1000),
+      default: null
     },
     otpMaxAttempts: {
       type: Number,
