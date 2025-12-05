@@ -6,10 +6,10 @@ import { Request,Response } from "express";
 import { IUserDocument } from "../types/models/user-types";
 import { createProduct } from "../services/product-service";
 
+
 const createProductController = asyncHandler(async(req:Request, res:Response)=>{
     const {id} = req.user as IUserDocument
-    const product:ProductInterface = await createProduct(id as string,req.body as ProductInterface)
-
+    const product:ProductInterface = await createProduct(id as string,req.body as any, req.files as any)
     if(!product){
         throw new ApiError(400,"Invalid/Incomplete data","")
     }

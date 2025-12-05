@@ -12,6 +12,7 @@ interface MyPayload extends JwtPayload{
 }
 
 const authMiddleware = asyncHandler(async(req:Request, _, next:NextFunction) =>{
+    console.log("i am in auth")
     const token:string = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer","")
     if(!token){
         throw new ApiError(401,"Unauthorized request","")
@@ -23,10 +24,10 @@ const authMiddleware = asyncHandler(async(req:Request, _, next:NextFunction) =>{
     if (!user) {
         throw new ApiError(404,"User not found","")
       }
+ 
     req.user = user
     next()
 })
-
 export{
     authMiddleware
 }

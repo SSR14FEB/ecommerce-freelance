@@ -2,7 +2,8 @@ import { Document, Schema } from "mongoose";
 import mongoose from "mongoose";
 
 interface VariantInterface{
-  image: string[];
+  images: string[];
+  video:string;
   color: string;
   size: string;
   price: number;
@@ -19,7 +20,6 @@ export interface ProductInterface extends Document {
   category: string;
   stock: number;
   variant: VariantInterface[];
-  images: string[];
   seller:mongoose.Types.ObjectId
   isFeatured: boolean;
   createdAt?: Date;
@@ -28,9 +28,13 @@ export interface ProductInterface extends Document {
 
 const VariantSchema = new Schema<VariantInterface>(
   {
-    image: {
+    images: {
       type: [String],
-      required: true,
+      default:[]
+    },
+    video:{
+      type: String,
+      default:""
     },
     color: {
       type: String,

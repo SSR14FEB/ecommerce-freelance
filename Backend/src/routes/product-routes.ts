@@ -1,9 +1,17 @@
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth-middleware";
-import { createProductController } from "../controllers/product_controller";
 import { roleMiddleware } from "../middlewares/role-middleware";
-const router = Router()
+import { uploadMulterMiddleware } from "../middlewares/multer-upload-middleware";
+import { createProductController } from "../controllers/product_controller";
 
-router.post("/create-product",authMiddleware,roleMiddleware,createProductController)
+const router = Router();
 
-export default router
+router.post(
+  "/create-product",
+  authMiddleware,
+  roleMiddleware,
+  uploadMulterMiddleware,
+  createProductController
+);
+
+export default router;

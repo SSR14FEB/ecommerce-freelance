@@ -9,7 +9,6 @@ const roleMiddleware = asyncHandler(async(req:Request,res:Response, next:NextFun
       throw new ApiError(401,"Unauthorized request","")
    }
    return next()
-
 })
 
 export {roleMiddleware}
