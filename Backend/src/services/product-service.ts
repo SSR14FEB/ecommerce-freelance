@@ -1,14 +1,12 @@
-import { IUserDocument } from "../types/models/user-types";
-import { User } from "../models/user-model";
 import { ApiError } from "../utils/apiError";
 import { Product, ProductInterface } from "../models/product-model";
 import { cloudinaryURLHandler } from "../utils/cloudinaryURLHandler";
-import { AwsInstance } from "twilio/lib/rest/accounts/v1/credential/aws";
+
 
 const createProduct = async (
-  seller: string,
+  sellerId: string,
   body: any,
-  files: any,
+  files: any
 ): Promise<ProductInterface> => {
   const {
     productName,
@@ -23,29 +21,45 @@ const createProduct = async (
   if ([productName, description, category].some((item) => item.trim() == "")) {
     throw new ApiError(403, "All fields are required", "");
   }
-  if (
-    price == 0 ||
-    stock == 0 ||
-    variant.length == 0 ||
-    isFeatured == false 
-  ) {
+  if (price == 0 || stock == 0 || variant.length == 0 || files.length==0 || isFeatured == false) {
     throw new ApiError(403, "All fields are required", "");
   }
-  const firstProductImageLocalPath = files?.Images[0].path||""
-  const secondProductImageLocalPath = files?.Images[1].path||""
-  const productVideoLocalPath = files.video[0].path
 
-  
-  const firstProductImageUrl = await cloudinaryURLHandler(firstProductImageLocalPath) || ""
-  const secondProductImageUrl = await cloudinaryURLHandler(secondProductImageLocalPath) || ""
-  const productVideoUrl = await cloudinaryURLHandler(productVideoLocalPath) || ""
+  const filesPathByField = files.reduce((acc: any, file: any) => {
+    if (!acc[file.fieldname]) {
+      acc[file.fieldname] = [];
+    }
+    acc[file.fieldname].push(file.path);
+    return acc;
+  }, {});
 
-  if([firstProductImageUrl, secondProductImageUrl].some((fields)=>(fields?.trim()==""))){
-    throw new ApiError(403, "All media fields are required", "");
+  const productVariants = await Promise.all(
+    Object.values(filesPathByField).map(async (v: any, index: number) => {
+      if (v.length === 2) {
+        const imagesLocalFilePath = [...v];
+        return { Images: await cloudinaryURLHandler(imagesLocalFilePath) };
+      } else if (v.length == 1) {
+        const videoLocalFilePath = [...v];
+        return { Video: await cloudinaryURLHandler(videoLocalFilePath) };
+      }
+    })
+  );
+
+  const groupedData: any[] = [];
+
+  for (let i = 0; i < productVariants.length; i += 2) {
+    const images = productVariants[i]?.Images ?? [];
+    const video = productVariants[i + 1]?.Video?.[0] ?? "";
+
+    groupedData.push({ images, video });
   }
-  
-  variant[0]["images"] = [firstProductImageUrl,secondProductImageUrl];
-  variant[0]["video"] = productVideoUrl || "";
+
+  const mediaUrlFetchedVariant = variant.map((v: any, index: number) => {
+    return {
+      ...v,
+      ...groupedData[index],
+    };
+  });
 
   const product = await Product.create({
     productName,
@@ -53,9 +67,9 @@ const createProduct = async (
     price,
     category,
     stock,
-    variant,
+    variant: mediaUrlFetchedVariant,
     isFeatured,
-    seller,
+    sellerId,
   });
 
   return product;

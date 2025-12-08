@@ -7,21 +7,14 @@ const storage = multer.diskStorage({
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random()*1e9) 
         cb(null,file.fieldname+ '-' +uniqueSuffix)
     }
-})
+});
 
 
 const upload = multer({storage:storage})
 
-const uploadMulterMiddleware = upload.fields([
-    {
-        name:"Images",
-        maxCount:2
-    },
-    {
-        name:"video",
-        maxCount:1
-    }
-])
+const uploadMulterMiddleware = upload.any()
+
+
 
 export {uploadMulterMiddleware}
 

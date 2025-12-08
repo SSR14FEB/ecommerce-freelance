@@ -24,7 +24,6 @@ const authMiddleware = asyncHandler(async(req:Request, _, next:NextFunction) =>{
     if (!user) {
         throw new ApiError(404,"User not found","")
       }
- 
     req.user = user
     next()
 })
