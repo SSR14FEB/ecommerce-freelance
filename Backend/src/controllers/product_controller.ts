@@ -4,7 +4,7 @@ import { ApiResponse } from "../utils/apiResponse";
 import { Product, ProductInterface } from "../models/product-model";
 import { Request,Response } from "express";
 import { IUserDocument } from "../types/models/user-types";
-import { createProduct } from "../services/product-service";
+import { createProduct,getProducts } from "../services/product-service";
 
 
 const createProductController = asyncHandler(async(req:Request, res:Response)=>{
@@ -18,7 +18,13 @@ const createProductController = asyncHandler(async(req:Request, res:Response)=>{
 })
 
 const getAllProductsController = asyncHandler(async(req:Request, res:Response)=>{
-
+    const {pageNo,sort,newestFirst} = req.query
+    const pageNumber = parseInt(pageNo as string, 10) || 1
+    const sortProducts = (parseInt(sort as string,10)=== -1?-1:1) as 1|-1
+    const sortByProductDate = (parseInt(newestFirst as string,10)===-1?-1:1) as 1|-1
+    const products:Object = await getProducts(pageNumber, sortProducts, sortByProductDate)
+    return res.status(200)
+    .json(new ApiResponse(200,"product fetched successfully",true,products))
 })
 
 const getProductByIdController = asyncHandler(async(req:Request, res:Response)=>{

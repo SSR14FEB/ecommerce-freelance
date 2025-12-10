@@ -6,7 +6,8 @@
   "type": "commonjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --exec ts-node -r dotenv/config src/index.ts"
+    "dev": "nodemon --exec ts-node -r dotenv/config src/index.ts",
+    "build":"tsc"
   },
   "keywords": [
     "E-commerce"

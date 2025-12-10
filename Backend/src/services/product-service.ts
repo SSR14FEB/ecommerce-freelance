@@ -2,7 +2,6 @@ import { ApiError } from "../utils/apiError";
 import { Product, ProductInterface } from "../models/product-model";
 import { cloudinaryURLHandler } from "../utils/cloudinaryURLHandler";
 
-
 const createProduct = async (
   sellerId: string,
   body: any,
@@ -21,7 +20,13 @@ const createProduct = async (
   if ([productName, description, category].some((item) => item.trim() == "")) {
     throw new ApiError(403, "All fields are required", "");
   }
-  if (price == 0 || stock == 0 || variant.length == 0 || files.length==0 || isFeatured == false) {
+  if (
+    price == 0 ||
+    stock == 0 ||
+    variant.length == 0 ||
+    files.length == 0 ||
+    isFeatured == false
+  ) {
     throw new ApiError(403, "All fields are required", "");
   }
 
@@ -74,5 +79,18 @@ const createProduct = async (
 
   return product;
 };
+const getProducts = async (
+  pageNo: number,
+  sortProducts: 1 | -1,
+  sortByProductDate: 1 | -1
+): Promise<ProductInterface[]> => {
+  const limit = 20;
+  const pageData = (pageNo - 1) * limit;
+  const productData = await Product.find().skip(pageData).limit(limit).sort({
+    price: sortProducts,
+    createdAt: sortByProductDate,
+  });
+  return productData;
+};
 
-export { createProduct };
+export { createProduct, getProducts };

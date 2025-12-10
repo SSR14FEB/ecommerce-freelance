@@ -2,7 +2,7 @@ import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth-middleware";
 import { roleMiddleware } from "../middlewares/role-middleware";
 import { uploadMulterMiddleware } from "../middlewares/multer-upload-middleware";
-import { createProductController } from "../controllers/product_controller";
+import { createProductController, getAllProductsController } from "../controllers/product_controller";
 
 const router = Router();
 
@@ -13,5 +13,6 @@ router.post(
   uploadMulterMiddleware,
   createProductController
 );
+router.get("/get-product-page",getAllProductsController)
 
 export default router;
