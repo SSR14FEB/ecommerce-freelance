@@ -20,7 +20,7 @@ export interface ProductInterface extends Document {
   category: string;
   stock: number;
   variant: VariantInterface[];
-  seller:mongoose.Types.ObjectId
+  sellerId:mongoose.Types.ObjectId
   isFeatured: boolean;
   createdAt?: Date;
   updatedAt?: Date;
@@ -83,13 +83,18 @@ const ProductSchema = new Schema<ProductInterface>(
       default: [],
     },
     isFeatured: { type: Boolean, default: false },
-    seller:{
+    sellerId:{
       type:mongoose.Schema.Types.ObjectId,
       ref:"User"
     }
   },
   { timestamps: true }
 );
+
+ProductSchema.index({
+  price:1,
+  createdAt:1
+})
 
 export const Product = mongoose.model<ProductInterface>(
   "Product",

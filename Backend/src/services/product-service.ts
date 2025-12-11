@@ -1,6 +1,7 @@
 import { ApiError } from "../utils/apiError";
 import { Product, ProductInterface } from "../models/product-model";
 import { cloudinaryURLHandler } from "../utils/cloudinaryURLHandler";
+import { promises } from "dns";
 
 const createProduct = async (
   sellerId: string,
@@ -86,11 +87,23 @@ const getProducts = async (
 ): Promise<ProductInterface[]> => {
   const limit = 20;
   const pageData = (pageNo - 1) * limit;
-  const productData = await Product.find().skip(pageData).limit(limit).sort({
-    price: sortProducts,
-    createdAt: sortByProductDate,
-  });
+  const productData = await Product.find()
+    .skip(pageData)
+    .limit(limit)
+    .sort({
+      price: sortProducts,
+      createdAt: sortByProductDate,
+    })
+    .lean();
   return productData;
 };
 
-export { createProduct, getProducts };
+const getProductById = async (id: string): Promise<ProductInterface> => {
+  const product = await Product.findById(id).lean();
+  if (!product) {
+    throw new ApiError(404, "Product not found", "", [], false);
+  }
+  return product;
+};
+
+export { createProduct, getProducts, getProductById };
