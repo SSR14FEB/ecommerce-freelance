@@ -106,4 +106,14 @@ const getProductById = async (id: string): Promise<ProductInterface> => {
   return product;
 };
 
-export { createProduct, getProducts, getProductById };
+const getProductByName = async (name: string): Promise<ProductInterface[]> => {
+  const products = await Product.find({
+    productName: { $regex: name, $options: "i" },
+  }).lean();
+  if (products.length === 0) {
+    throw new ApiError(404, "No products found with the given name", "", [], false);
+  }
+  return products;
+}
+
+export { createProduct, getProducts, getProductById, getProductByName };

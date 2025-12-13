@@ -1,10 +1,10 @@
 import { asyncHandler } from "../utils/asyncHandler";
 import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
-import { Product, ProductInterface } from "../models/product-model";
+import { ProductInterface } from "../models/product-model";
 import { Request,Response } from "express";
 import { IUserDocument } from "../types/models/user-types";
-import { createProduct,getProducts,getProductById } from "../services/product-service";
+import { createProduct, getProducts, getProductById, getProductByName} from "../services/product-service";
 import mongoose from "mongoose";
 
 
@@ -31,6 +31,13 @@ const getAllProductsController = asyncHandler(async(req:Request, res:Response)=>
 const getProductByIdController = asyncHandler(async(req:Request, res:Response)=>{
     const {id}= req.params;
     const product:Object = await getProductById(id as string)
+    return res.status(200)
+    .json(new ApiResponse(200,"Product fetched successfully",true,product))
+})
+
+const getProductByNameController = asyncHandler(async(req:Request, res:Response)=>{
+    const {name} = req.params;
+    const product:Object = await getProductByName(name as string)
     return res.status(200)
     .json(new ApiResponse(200,"Product fetched successfully",true,product))
 })
@@ -71,6 +78,7 @@ export{
     createProductController,
     getAllProductsController,
     getProductByIdController,
+    getProductByNameController,
     updateProductController,
     deleteProductController,
     updateStockController,
