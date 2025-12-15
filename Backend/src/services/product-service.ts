@@ -1,7 +1,6 @@
 import { ApiError } from "../utils/apiError";
 import { Product, ProductInterface } from "../models/product-model";
 import { cloudinaryURLHandler } from "../utils/cloudinaryURLHandler";
-import { promises } from "dns";
 
 const createProduct = async (
   sellerId: string,

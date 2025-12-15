@@ -5,7 +5,7 @@ import { ProductInterface } from "../models/product-model";
 import { Request,Response } from "express";
 import { IUserDocument } from "../types/models/user-types";
 import { createProduct, getProducts, getProductById, getProductByName} from "../services/product-service";
-import mongoose from "mongoose";
+import mongoose, { ObjectId } from "mongoose";
 
 
 const createProductController = asyncHandler(async(req:Request, res:Response)=>{
@@ -14,6 +14,9 @@ const createProductController = asyncHandler(async(req:Request, res:Response)=>{
     if(!product){
         throw new ApiError(400,"Invalid/Incomplete data","")
     }
+    req.user?.products?.push(new mongoose.Types.ObjectId(product._id))
+    await req.user?.save()
+    console.log(product)
     return res.status(200)
     .json(new ApiResponse(200,"Product is created successfully",true,product))
 })
@@ -49,8 +52,7 @@ const updateProductController = asyncHandler(async(req:Request, res:Response)=>{
     
 })
 
-const deleteProductController = asyncHandler(async(req:Request, res:Response)=>{
-    
+const deleteProductController = asyncHandler(async(req:Request, res:Response)=>{  
 })
 
 const updateStockController = asyncHandler(async(req:Request, res:Response)=>{

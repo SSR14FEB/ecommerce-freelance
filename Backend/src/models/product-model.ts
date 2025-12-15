@@ -1,4 +1,4 @@
-import { Document, Schema } from "mongoose";
+import { Document, ObjectId, Schema } from "mongoose";
 import mongoose from "mongoose";
 import { text } from "stream/consumers";
 
@@ -15,6 +15,7 @@ interface VariantInterface{
 }
 
 export interface ProductInterface extends Document {
+  _id:mongoose.Types.ObjectId;
   productName: string;
   description: string;
   price: number;

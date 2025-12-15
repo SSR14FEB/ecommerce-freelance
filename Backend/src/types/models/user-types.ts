@@ -24,6 +24,7 @@ interface UserInterface {
   cart: mongoose.Types.ObjectId[];
   order: mongoose.Types.ObjectId[];
   wishList: mongoose.Types.ObjectId[];
+  products: mongoose.Types.ObjectId[];
   isVerified: boolean;
   refreshToken: string;
   accessToken: string;

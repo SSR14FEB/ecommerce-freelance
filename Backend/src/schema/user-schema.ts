@@ -1,5 +1,6 @@
 import mongoose, { Document, Schema } from "mongoose";
 import { AddressInterface, IUserDocument, role } from "../types/models/user-types";
+import { Product } from "../models/product-model";
 export const AddressSchema = new Schema<AddressInterface>(
   {
     street: {
@@ -91,6 +92,10 @@ export const UserSchema = new Schema<IUserDocument>(
       type: String,
       enum: Object.values(role),
       default:role.BUYER
+    },
+    products:{
+      type:[mongoose.Schema.Types.ObjectId],
+      ref:"Product"
     },
     isVerified: {
       type: Boolean,

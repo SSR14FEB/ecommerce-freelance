@@ -16,19 +16,6 @@ UserSchema.pre("save", async function(next){
  }
 }) 
 
-// UserSchema.pre("save", function(next){
-//  try {
-//    if(this.isVerified){
-//      this.otpMaxAttempts = 0;
-//      this.otpNextAttempt = undefined;
-//   }
-//   next();
-//  } catch (error) {
-//   console.log(error)
-//   throw new Error("Error 500 something went wrong while verifying user")
-//  }
-// })
-
 UserSchema.methods.validateOtp = async function(otp:string):Promise<boolean>{
  try {
    return await bcrypt.compare(otp, this.otp);
