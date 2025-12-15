@@ -106,14 +106,34 @@ const getProductById = async (id: string): Promise<ProductInterface> => {
   return product;
 };
 
-const getProductByName = async (name: string): Promise<ProductInterface[]> => {
-  const products = await Product.find({
+const getProductByName = async (
+  name: string,
+  pageNo: number,
+  sortProducts: 1 | -1,
+  sortByProductDate: 1 | -1
+): Promise<ProductInterface[]> => {
+  const limit = 20;
+  const pageData = (pageNo - 1) * limit;
+  const productData = await Product.find({
     productName: { $regex: name, $options: "i" },
-  }).lean();
-  if (products.length === 0) {
-    throw new ApiError(404, "No products found with the given name", "", [], false);
+  })
+    .skip(pageData)
+    .limit(limit)
+    .sort({
+      price: sortProducts,
+      createdAt: sortByProductDate,
+    })
+    .lean();
+  if (productData.length === 0) {
+    throw new ApiError(
+      404,
+      "No products found with the given name",
+      "",
+      [],
+      false
+    );
   }
-  return products;
-}
+  return productData;
+};
 
 export { createProduct, getProducts, getProductById, getProductByName };

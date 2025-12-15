@@ -15,5 +15,5 @@ router.post(
 );
 router.get("/get-product-page",getAllProductsController)
 router.get("/get-product-by-Id/:id",getProductByIdController)
-router.get("/get-product-by-name/:name",getProductByNameController)
+router.get("/get-product-by-name",getProductByNameController)
 export default router;

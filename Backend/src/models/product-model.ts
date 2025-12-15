@@ -1,5 +1,6 @@
 import { Document, Schema } from "mongoose";
 import mongoose from "mongoose";
+import { text } from "stream/consumers";
 
 interface VariantInterface{
   images: string[];
@@ -61,6 +62,8 @@ const ProductSchema = new Schema<ProductInterface>(
     productName: {
       type: String,
       required: true,
+      index:true,
+      trim:true,
     },
     description: {
       type: String,
@@ -95,6 +98,11 @@ ProductSchema.index({
   price:1,
   createdAt:1
 })
+ProductSchema.index({
+  name:1,
+  createdAt:1,
+})
+
 
 export const Product = mongoose.model<ProductInterface>(
   "Product",

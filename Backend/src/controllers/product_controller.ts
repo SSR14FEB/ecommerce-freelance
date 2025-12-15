@@ -36,8 +36,11 @@ const getProductByIdController = asyncHandler(async(req:Request, res:Response)=>
 })
 
 const getProductByNameController = asyncHandler(async(req:Request, res:Response)=>{
-    const {name} = req.params;
-    const product:Object = await getProductByName(name as string)
+     const {name,pageNo,sort,newestFirst} = req.query
+     const pageNumber = parseInt(pageNo as string, 10) || 1
+     const sortProducts = (parseInt(sort as string, 10)===-1?-1:1) as -1|1
+     const sortByProductDate = (parseInt(sort as string, 10)===-1?-1:1) as -1|1
+    const product:Object = await getProductByName(name as string,pageNumber,sortProducts,sortByProductDate)
     return res.status(200)
     .json(new ApiResponse(200,"Product fetched successfully",true,product))
 })
