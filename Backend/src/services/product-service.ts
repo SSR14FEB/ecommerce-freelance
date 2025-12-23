@@ -1,6 +1,7 @@
 import { ApiError } from "../utils/apiError";
 import { Product, ProductInterface } from "../models/product-model";
 import { cloudinaryURLHandler } from "../utils/cloudinaryURLHandler";
+import { User } from "../models/user-model";
 
 const createProduct = async (
   sellerId: string,
@@ -135,4 +136,19 @@ const getProductByName = async (
   return productData;
 };
 
-export { createProduct, getProducts, getProductById, getProductByName };
+const updateProduct = async (product_id : string, variant_id  : string, variant_image  : string , variant_video : string ,updates : any ): Promise<ProductInterface> => {
+  const productData = await Product.findById(product_id);
+  if (!productData) {
+    throw new ApiError(404,"no product found","",[],false)
+  }
+  console.log(productData.variant[0].images)
+  return productData;
+};
+
+export {
+  createProduct,
+  getProducts,
+  getProductById,
+  getProductByName,
+  updateProduct,
+};

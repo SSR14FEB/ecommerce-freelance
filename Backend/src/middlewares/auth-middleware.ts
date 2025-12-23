@@ -1,7 +1,7 @@
 import { ApiError } from "../utils/apiError";
 import { asyncHandler } from "../utils/asyncHandler";
 import { User } from "../models/user-model";
-import {IUserDocument} from "../types/models/user-types"
+import {IUserDocument} from "../types/models/user-model-types"
 import { Request, NextFunction } from "express";
 import jwt, { JwtPayload, Secret }  from "jsonwebtoken";
 

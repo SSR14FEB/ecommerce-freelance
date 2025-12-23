@@ -11,7 +11,7 @@ import {
 
 import mongoose from "mongoose";
 import { User } from "../models/user-model";
-import { IUserDocument } from "../types/models/user-types";
+import { IUserDocument } from "../types/models/user-model-types";
 
 interface CookieOptions {
   httpOnly: boolean;

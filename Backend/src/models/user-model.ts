@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import jwt, { Secret, SignOptions } from "jsonwebtoken";
 import bcrypt from "bcryptjs"
-import {IUserDocument} from "../types/models/user-types"
+import {IUserDocument} from "../types/models/user-model-types"
 import { UserSchema} from "../schema/user-schema";
 
 UserSchema.pre("save", async function(next){

@@ -1,5 +1,5 @@
 import mongoose, { Document, Schema } from "mongoose";
-import { AddressInterface, IUserDocument, role } from "../types/models/user-types";
+import { AddressInterface, IUserDocument, role } from "../types/models/user-model-types";
 import { Product } from "../models/product-model";
 export const AddressSchema = new Schema<AddressInterface>(
   {

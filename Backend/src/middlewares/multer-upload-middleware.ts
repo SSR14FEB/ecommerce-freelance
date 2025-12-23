@@ -14,8 +14,6 @@ const upload = multer({storage:storage})
 
 const uploadMulterMiddleware = upload.any()
 
-
-
 export {uploadMulterMiddleware}
 
 

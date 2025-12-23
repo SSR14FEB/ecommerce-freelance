@@ -2,7 +2,7 @@ import { ApiResponse } from "../utils/apiResponse";
 import { asyncHandler } from "../utils/asyncHandler";
 import { Request, Response } from "express";
 import { User } from "../models/user-model";
-import { IUserDocument } from "../types/models/user-types";
+import { IUserDocument } from "../types/models/user-model-types";
 import { signup } from "../services/user-service";
 import { editProfile } from "../services/user-service";
 import { updateContactNumber } from "../services/user-service";

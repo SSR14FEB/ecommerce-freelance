@@ -3,11 +3,11 @@ import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
 import { ProductInterface } from "../models/product-model";
 import { Request,Response } from "express";
-import { IUserDocument } from "../types/models/user-types";
-import { createProduct, getProducts, getProductById, getProductByName} from "../services/product-service";
+import { IUserDocument } from "../types/models/user-model-types";
+import { createProduct, getProducts, getProductById, getProductByName, updateProduct} from "../services/product-service";
 import mongoose from "mongoose";
 import {redis} from "../config/redis"
-import { json } from "stream/consumers";
+
 
 
 const createProductController = asyncHandler(async(req:Request, res:Response)=>{
@@ -68,7 +68,11 @@ const getProductByNameController = asyncHandler(async(req:Request, res:Response)
 })
 
 const updateProductController = asyncHandler(async(req:Request, res:Response)=>{
-    
+    const {product_id, variant_id, variant_image, variant_video,updates} = req.body
+
+    const updatedProduct = await updateProduct(product_id as string, variant_id  as string, variant_image  as string , variant_video as string, updates as any )
+    return res.status(201)
+    .json(new ApiResponse(201,"product is updated successfully",true,updatedProduct))
 })
 
 const deleteProductController = asyncHandler(async(req:Request, res:Response)=>{  
@@ -84,10 +88,6 @@ const getProductByCategoryController = asyncHandler(async(req:Request, res:Respo
 
 const getFeaturedProductController = asyncHandler(async(req:Request, res:Response)=>{
 
-})
-
-const getBulkProductUploadController = asyncHandler(async(req:Request, res:Response)=>{
-    
 })
 
 const applyDiscountOnProductController = asyncHandler(async(req:Request ,res:Response)=>{
@@ -108,7 +108,6 @@ export{
     updateStockController,
     getProductByCategoryController,
     getFeaturedProductController,
-    getBulkProductUploadController,
     applyDiscountOnProductController,
     validateProductController
 }
