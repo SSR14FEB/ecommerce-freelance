@@ -1,10 +1,10 @@
 import { User } from "../models/user-model";
 import { IUserDocument } from "../types/models/user-model-types";
 import { ApiError } from "../utils/apiError";
-
+import { SignupPayLoad,EditProfilePayload } from "../types/controllers/user-controller-type";
 const signup = async (
   user_id: string,
-  body: IUserDocument
+  body: SignupPayLoad
 ): Promise<IUserDocument> => {
   const { name, email, addresses } = body;
   if ([name, email].some((field) => field.trim() == "")) {
@@ -24,7 +24,7 @@ const signup = async (
 
 const editProfile = async (
   user_id: string,
-  body: IUserDocument
+  body: EditProfilePayload
 ): Promise<IUserDocument> => {
   const { name, email, addresses } = body;
   const user: IUserDocument | null = await User.findById({ _id: user_id });
@@ -32,9 +32,9 @@ const editProfile = async (
   if (!user) {
     throw new ApiError(404, "User not found", "");
   }
-  user.name = name.trim().toLocaleLowerCase() || user.name;
-  user.email = email.trim() || user.email;
-  user.addresses = addresses.length > 0 ? addresses : user.addresses;
+  user.name = name?.trim().toLocaleLowerCase() || user.name;
+  user.email = email?.trim() || user.email;
+  user.addresses = addresses && addresses.length > 0 ? addresses : user.addresses;
 
   await user.save();
   return user;

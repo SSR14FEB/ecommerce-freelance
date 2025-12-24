@@ -1,7 +1,7 @@
 import { Schema } from "mongoose";
 import { VariantInterface } from "../types/models/product-model-type";
 import { ProductInterface } from "../types/models/product-model-type";
-
+import mongoose from "mongoose";
 const VariantSchema = new Schema<VariantInterface>(
   {
     images: {
