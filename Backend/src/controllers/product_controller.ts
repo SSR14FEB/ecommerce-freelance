@@ -1,7 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler";
 import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
-import { ProductInterface } from "../models/product-model";
+import { ProductInterface } from "../types/models/product-model-type";
 import { Request,Response } from "express";
 import { IUserDocument } from "../types/models/user-model-types";
 import { createProduct, getProducts, getProductById, getProductByName, updateProduct} from "../services/product-service";

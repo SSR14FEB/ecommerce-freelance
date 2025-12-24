@@ -1,5 +1,6 @@
 import { ApiError } from "../utils/apiError";
-import { Product, ProductInterface } from "../models/product-model";
+import { Product} from "../models/product-model";
+import { ProductInterface } from "../types/models/product-model-type";
 import { cloudinaryURLHandler } from "../utils/cloudinaryURLHandler";
 import { User } from "../models/user-model";
 
