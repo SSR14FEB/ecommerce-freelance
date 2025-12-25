@@ -1,8 +1,13 @@
 import { ApiError } from "../utils/apiError";
-import { Product} from "../models/product-model";
+import { Product } from "../models/product-model";
 import { ProductInterface } from "../types/models/product-model-type";
 import { cloudinaryURLHandler } from "../utils/cloudinaryURLHandler";
 import { User } from "../models/user-model";
+import mongoose from "mongoose";
+import { UpdateProductPayload } from "../types/services/product-service-types";
+import app from "../app";
+import Api from "twilio/lib/rest/Api";
+import ApiBase from "twilio/lib/rest/ApiBase";
 
 const createProduct = async (
   sellerId: string,
@@ -137,13 +142,47 @@ const getProductByName = async (
   return productData;
 };
 
-const updateProduct = async (product_id : string, variant_id  : string, variant_image  : string , variant_video : string ,updates : any ): Promise<ProductInterface> => {
-  const productData = await Product.findById(product_id);
-  if (!productData) {
-    throw new ApiError(404,"no product found","",[],false)
+const updateProduct = async ({
+  productId,
+  variantId,
+  productUpdates = {},
+  variantUpdates = {},
+}: UpdateProductPayload): Promise<ProductInterface> => {
+  if (!(productId || variantId)) {
+    throw new ApiError(404, "Product id not found", "");
   }
-  console.log(productData.variant[0].images)
-  return productData;
+  if (
+    [productUpdates, variantUpdates].some((fields) =>
+      Object.values(fields).some((value) => value == "")
+    )
+  ) {
+    throw new ApiError(403, "All fields are required", "");
+  }
+
+  const query: any = {
+    _id: productId,
+  };
+  query["variant._id"] = variantId;
+
+  const updateQuery: any = { $set: {} };
+  const option = { new: true };
+
+  for (const key in productUpdates) {
+    updateQuery.$set[key] = productUpdates[key];
+  }
+
+  for (const key in variantUpdates) {
+    updateQuery.$set[`variant.$.${key}`] = variantUpdates[key];
+  }
+
+  const updatedProduct: ProductInterface | null =
+    await Product.findOneAndUpdate(query, updateQuery, option).lean();
+
+  if (!updatedProduct) {
+    throw new ApiError(404, "Product not found", "");
+  }
+
+  return updatedProduct;
 };
 
 export {

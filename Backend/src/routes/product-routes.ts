@@ -16,5 +16,7 @@ router.post(
 router.get("/get-product-page",getAllProductsController)
 router.get("/get-product-by-Id/:id",getProductByIdController)
 router.get("/get-product-by-name",getProductByNameController)
-router.get("/update-product",authMiddleware,roleMiddleware,updateProductController)
+
+router.patch("/update-product",authMiddleware,roleMiddleware,uploadMulterMiddleware,updateProductController)
+
 export default router;

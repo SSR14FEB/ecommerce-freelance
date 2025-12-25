@@ -7,6 +7,8 @@ import { IUserDocument } from "../types/models/user-model-types";
 import { createProduct, getProducts, getProductById, getProductByName, updateProduct} from "../services/product-service";
 import mongoose from "mongoose";
 import {redis} from "../config/redis"
+import { UpdateProductPayload } from "../types/controllers/product-controller-type";
+
 
 
 
@@ -67,10 +69,13 @@ const getProductByNameController = asyncHandler(async(req:Request, res:Response)
     .json(new ApiResponse(200,"Product fetched successfully",true,product))
 })
 
-const updateProductController = asyncHandler(async(req:Request, res:Response)=>{
-    const {product_id, variant_id, variant_image, variant_video,updates} = req.body
+const updateProductController = asyncHandler(async(req:Request<{},{},UpdateProductPayload>, res:Response)=>{
+    const payload : UpdateProductPayload = req.body 
+    
+    console.log(req.body)
+    
+    const updatedProduct = await updateProduct(payload)
 
-    const updatedProduct = await updateProduct(product_id as string, variant_id  as string, variant_image  as string , variant_video as string, updates as any )
     return res.status(201)
     .json(new ApiResponse(201,"product is updated successfully",true,updatedProduct))
 })
