@@ -2,12 +2,10 @@ import { ApiError } from "../utils/apiError";
 import { Product } from "../models/product-model";
 import { ProductInterface } from "../types/models/product-model-type";
 import { cloudinaryURLHandler } from "../utils/cloudinaryURLHandler";
-import { User } from "../models/user-model";
-import mongoose from "mongoose";
-import { UpdateProductPayload } from "../types/services/product-service-types";
-import app from "../app";
-import Api from "twilio/lib/rest/Api";
-import ApiBase from "twilio/lib/rest/ApiBase";
+import {
+  UpdateProductPayload,
+  UpdateProductMediaPayload,
+} from "../types/services/product-service-types";
 
 const createProduct = async (
   sellerId: string,
@@ -185,10 +183,92 @@ const updateProduct = async ({
   return updatedProduct;
 };
 
+const updateProductMedia = async ({
+  productId,
+  variantId,
+  imageIndex,
+  files,
+}: UpdateProductMediaPayload) => {
+  if (!(productId || variantId)) {
+    throw new ApiError(403, "Product id or variant id is required", "");
+  }
+  if (files.length === 0) {
+    throw new ApiError(403, "All fields are required", "");
+  }
+
+  const filesPathByField = files?.reduce((acc: any, file: any) => {
+    if (!acc[file.fieldname]) {
+      acc[file.fieldname] = [];
+    }
+    acc[file.fieldname].push(file.path);
+    return acc;
+  }, {});
+
+  const query: any = {
+    _id: productId,
+    "variant._id": variantId,
+  };
+
+  const imagePaths = [];
+  let videoPaths = [];
+
+  for (const v of Object.values(filesPathByField)) {
+    const flat = (v as any[]).flat();
+
+    if (flat.some((p) => p.includes("image"))) {
+      imagePaths.push(...flat);
+    }
+
+    if (flat.some((p) => p.includes("videoFile"))) {
+      videoPaths = flat;
+    }
+  }
+
+  const productVariantsUrl = [];
+
+  if (imagePaths.length) {
+    productVariantsUrl.push({
+      Images: await cloudinaryURLHandler(imagePaths),
+    });
+  }
+
+  if (videoPaths.length) {
+    productVariantsUrl.push({
+      Video: await cloudinaryURLHandler(videoPaths),
+    });
+  }
+  const updateMediaQuery: any = { $set: {} };
+  const imagesObj = productVariantsUrl[0]?.Images || [];
+  const option = { new: true };
+  const imagesArray = Object.values(imagesObj);
+
+  const keys = Object.keys(filesPathByField)
+  for (let i = 0; i < imagesArray.length; i++) {
+    updateMediaQuery.$set[`variant.$.${keys[i]}`] =
+      productVariantsUrl[0]?.Images?.[i];
+  }
+
+  const video = productVariantsUrl.find((v) => v?.Video)?.Video?.[0];
+
+  if (video) {
+    updateMediaQuery.$set[`variant.$.video`] =
+      productVariantsUrl[1]?.Video?.[0];
+  }
+
+  const updatedProduct = await Product.findOneAndUpdate(
+    query,
+    updateMediaQuery,
+    option
+  );
+
+  return updatedProduct;
+};
+
 export {
   createProduct,
   getProducts,
   getProductById,
   getProductByName,
   updateProduct,
+  updateProductMedia,
 };

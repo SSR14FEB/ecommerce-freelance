@@ -3,9 +3,11 @@ export interface UpdateProductPayload{
     variantId:string;
     productUpdates:Record<string,any>
     variantUpdates:Record<string,any>
-    imageUpdate?:{
-        index:number;
-        url:string;
-    }
-    videoUpdate?:string;
+}
+
+export interface UpdateProductMediaPayload{
+    productId:string;
+    variantId:string;
+    imageIndex:number;
+     files:any
 }

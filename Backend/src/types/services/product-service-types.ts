@@ -5,8 +5,9 @@ export interface UpdateProductPayload{
     variantUpdates:Record<string,any>
 }
 
-export interface UpdateProductMedia{
-    imageIndex:number;
-    File:string;
-    videoFile?:string;
+export interface UpdateProductMediaPayload{
+    productId:string;
+    variantId:string;
+    imageIndex?:number;
+    files?:any;
 }
