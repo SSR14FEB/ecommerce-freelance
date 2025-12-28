@@ -186,7 +186,6 @@ const updateProduct = async ({
 const updateProductMedia = async ({
   productId,
   variantId,
-  imageIndex,
   files,
 }: UpdateProductMediaPayload) => {
   if (!(productId || variantId)) {

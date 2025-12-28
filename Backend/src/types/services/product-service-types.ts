@@ -8,6 +8,5 @@ export interface UpdateProductPayload{
 export interface UpdateProductMediaPayload{
     productId:string;
     variantId:string;
-    imageIndex?:number;
     files?:any;
 }
