@@ -1,11 +1,13 @@
 import { ApiError } from "../utils/apiError";
 import { Product } from "../models/product-model";
+import { User } from "../models/user-model";
 import { ProductInterface } from "../types/models/product-model-type";
 import { cloudinaryURLHandler } from "../utils/cloudinaryURLHandler";
 import {
   UpdateProductPayload,
   UpdateProductMediaPayload,
 } from "../types/services/product-service-types";
+import { IUserDocument } from "../types/models/user-model-types";
 
 const createProduct = async (
   sellerId: string,
@@ -241,7 +243,7 @@ const updateProductMedia = async ({
   const option = { new: true };
   const imagesArray = Object.values(imagesObj);
 
-  const keys = Object.keys(filesPathByField)
+  const keys = Object.keys(filesPathByField);
   for (let i = 0; i < imagesArray.length; i++) {
     updateMediaQuery.$set[`variant.$.${keys[i]}`] =
       productVariantsUrl[0]?.Images?.[i];
@@ -263,6 +265,35 @@ const updateProductMedia = async ({
   return updatedProduct;
 };
 
+const deleteProduct = async (
+  userId: string,
+  productId: string
+): Promise<IUserDocument> => {
+  const query = {
+    _id: userId,
+    products: productId,
+  };
+
+  const deleteQuery = {
+    $pull: { products: productId },
+  };
+
+  const option = {
+    new: true,
+  };
+
+  const deletedProduct = await User.findOneAndUpdate(
+    query,
+    deleteQuery,
+    option
+  );
+
+  if (!deletedProduct) {
+    throw new ApiError(404, "Product not found", "");
+  }
+
+  return deletedProduct as IUserDocument;
+};
 export {
   createProduct,
   getProducts,
@@ -270,4 +301,5 @@ export {
   getProductByName,
   updateProduct,
   updateProductMedia,
+  deleteProduct,
 };

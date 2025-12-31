@@ -4,7 +4,7 @@ import { ApiResponse } from "../utils/apiResponse";
 import { ProductInterface } from "../types/models/product-model-type";
 import { Request,Response } from "express";
 import { IUserDocument } from "../types/models/user-model-types";
-import { createProduct, getProducts, getProductById, getProductByName, updateProduct, updateProductMedia} from "../services/product-service";
+import { createProduct, getProducts, getProductById, getProductByName, updateProduct, updateProductMedia, deleteProduct} from "../services/product-service";
 import mongoose from "mongoose";
 import {redis} from "../config/redis-config"
 import { UpdateProductPayload, UpdateProductMediaPayload} from "../types/controllers/product-controller-type";
@@ -90,6 +90,11 @@ const updateProductMediaController = asyncHandler(async(req:Request,res:Response
 })
 
 const deleteProductController = asyncHandler(async(req:Request, res:Response)=>{  
+    const {id} = req.user as IUserDocument
+    const productId:string = req.params.id as string
+    const deletedProduct = await deleteProduct(id,productId)
+    return res.status(200)
+    .json(new ApiResponse(200,"product deleted successful",true,deletedProduct))
 })
 
 const updateStockController = asyncHandler(async(req:Request, res:Response)=>{

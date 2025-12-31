@@ -1,3 +1,5 @@
+import { IUserDocument } from "../models/user-model-types";
+
 export interface UpdateProductPayload{
     productId:string;
     variantId:string;
