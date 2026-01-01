@@ -102,7 +102,10 @@ const updateStockController = asyncHandler(async(req:Request, res:Response)=>{
 })
 
 const getProductByCategoryController = asyncHandler(async(req:Request, res:Response)=>{
-    
+    const {category} = req.params;
+    const product = await productByCategory(category)
+    return res.status(200)
+    .json(new ApiResponse(200,"Product fetched by category successful",product))
 })
 
 const getFeaturedProductController = asyncHandler(async(req:Request, res:Response)=>{

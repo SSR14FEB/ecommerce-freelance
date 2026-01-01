@@ -294,6 +294,14 @@ const deleteProduct = async (
 
   return deletedProduct as IUserDocument;
 };
+
+const productByCategory = async({category}:any):Promise<ProductInterface[]>=>{
+  const product = await Product.find(category)
+  if(!product){
+    throw new ApiError(404,"Product not found","")
+  }
+  return product
+}
 export {
   createProduct,
   getProducts,
