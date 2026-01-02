@@ -4,7 +4,7 @@ import { ApiResponse } from "../utils/apiResponse";
 import { ProductInterface } from "../types/models/product-model-type";
 import { Request,Response } from "express";
 import { IUserDocument } from "../types/models/user-model-types";
-import { createProduct, getProducts, getProductById, getProductByName, updateProduct, updateProductMedia, deleteProduct} from "../services/product-service";
+import { createProduct, getProducts, getProductById, getProductByName, updateProduct, updateProductMedia, deleteProduct,productByCategory,applyDiscountOnProduct} from "../services/product-service";
 import mongoose from "mongoose";
 import {redis} from "../config/redis-config"
 import { UpdateProductPayload, UpdateProductMediaPayload} from "../types/controllers/product-controller-type";
@@ -108,16 +108,14 @@ const getProductByCategoryController = asyncHandler(async(req:Request, res:Respo
     .json(new ApiResponse(200,"Product fetched by category successful",product))
 })
 
-const getFeaturedProductController = asyncHandler(async(req:Request, res:Response)=>{
 
-})
 
 const applyDiscountOnProductController = asyncHandler(async(req:Request ,res:Response)=>{
-
-})
-
-const validateProductController = asyncHandler(async(req:Request, res:Response)=>{
-
+    const {productId,disc} = req.params;
+    const discount = parseInt(disc as string,10);
+    const discountedProduct = await applyDiscountOnProduct(discount,productId)
+    return res.status(201)
+    .json(new ApiResponse(201,"Discount applied on product successful",true,discountedProduct))
 })
 
 export{
@@ -130,7 +128,5 @@ export{
     deleteProductController,
     updateStockController,
     getProductByCategoryController,
-    getFeaturedProductController,
     applyDiscountOnProductController,
-    validateProductController
 }

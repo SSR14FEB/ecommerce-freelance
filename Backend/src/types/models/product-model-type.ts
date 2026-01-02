@@ -6,7 +6,6 @@ export interface VariantInterface{
   video:string;
   color: string;
   size: string;
-  price: number;
   stock: number;
   createdAt?: Date;
   updatedAt?: Date;
@@ -17,6 +16,7 @@ export interface ProductInterface extends Document {
   _id:mongoose.Types.ObjectId;
   productName: string;
   description: string;
+  mrp:number;
   price: number;
   category: string;
   stock: number;

@@ -8,6 +8,7 @@ import {
   UpdateProductMediaPayload,
 } from "../types/services/product-service-types";
 import { IUserDocument } from "../types/models/user-model-types";
+import { disconnect } from "process";
 
 const createProduct = async (
   sellerId: string,
@@ -17,6 +18,7 @@ const createProduct = async (
   const {
     productName,
     description,
+    mrp,
     price,
     category,
     stock,
@@ -28,6 +30,7 @@ const createProduct = async (
     throw new ApiError(403, "All fields are required", "");
   }
   if (
+    mrp==0 ||
     price == 0 ||
     stock == 0 ||
     variant.length == 0 ||
@@ -76,6 +79,7 @@ const createProduct = async (
   const product = await Product.create({
     productName,
     description,
+    mrp,
     price,
     category,
     stock,
@@ -302,12 +306,24 @@ const productByCategory = async({category}:any):Promise<ProductInterface[]>=>{
   }
   return product
 }
+const applyDiscountOnProduct = async(discount : number,productId:string):Promise<ProductInterface> =>{
+const product = await Product.findByIdAndUpdate(productId)
+if(!product){
+  throw new ApiError(404,"Product not found","")
+}
+product.price = product.mrp - discount;
+
+await product.save()
+return product
+}
 export {
   createProduct,
   getProducts,
   getProductById,
+  productByCategory,
   getProductByName,
   updateProduct,
   updateProductMedia,
   deleteProduct,
+  applyDiscountOnProduct
 };

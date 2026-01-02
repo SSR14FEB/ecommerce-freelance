@@ -20,10 +20,6 @@ const VariantSchema = new Schema<VariantInterface>(
       type: String,
       required: true,
     },
-    price: {
-      type: Number,
-      required: true,
-    },
     stock: {
       type: Number,
       required: true,
@@ -44,6 +40,10 @@ export const ProductSchema = new Schema<ProductInterface>(
       type: String,
       required: true,
     },
+    mrp:{
+      type: Number,
+      required: true,
+    }
     price: {
       type: Number,
       required: true,
