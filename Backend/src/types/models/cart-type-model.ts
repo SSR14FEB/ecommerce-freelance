@@ -6,6 +6,7 @@ export interface ItemInterface{
     price:number;
 }
 export interface CartInterface extends Document{
+    user:mongoose.Types.ObjectId;
     cartItem:ItemInterface[];
     subTotal:number;
     createdAt:Date;

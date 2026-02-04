@@ -20,8 +20,9 @@ export interface ProductInterface extends Document {
   price: number;
   category: string;
   stock: number;
+  weight:number;
   variant: VariantInterface[];
-  sellerId:mongoose.Types.ObjectId
+  sellerId:mongoose.Types.ObjectId;
   isFeatured: boolean;
   createdAt?: Date;
   updatedAt?: Date;

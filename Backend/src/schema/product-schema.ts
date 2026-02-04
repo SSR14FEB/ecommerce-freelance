@@ -43,7 +43,7 @@ export const ProductSchema = new Schema<ProductInterface>(
     mrp:{
       type: Number,
       required: true,
-    }
+    },
     price: {
       type: Number,
       required: true,
@@ -59,6 +59,10 @@ export const ProductSchema = new Schema<ProductInterface>(
     variant: {
       type: [VariantSchema],
       default: [],
+    },
+    weight:{
+      type:Number,
+      required:[true,"weight is required"]
     },
     isFeatured: { type: Boolean, default: false },
     sellerId:{

@@ -14,8 +14,25 @@ app.use(express.static('public'));
 import auth from "./routes/auth-routes"
 import user from "./routes/user-routes"
 import product from "./routes/product-routes"
+import cart from "./routes/cart-routes"
+import orders from './routes/order-routes';
+import payments from './routes/payment-routes';
 
+// Auth
 app.use("/api/user-authentication",auth)
+
+// User
 app.use("/api/user",user)
+
+// Product
 app.use("/api/product",product)
+
+// Cart
+app.use("/api/cart",cart)
+
+// Order-product
+app.use("/api/order-product",orders)
+
+// Payment-order
+app.use("/api/payment-order",payments)
 export default app;

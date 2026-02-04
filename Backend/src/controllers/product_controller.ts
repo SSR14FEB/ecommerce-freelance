@@ -105,7 +105,7 @@ const getProductByCategoryController = asyncHandler(async(req:Request, res:Respo
     const {category} = req.params;
     const product = await productByCategory(category)
     return res.status(200)
-    .json(new ApiResponse(200,"Product fetched by category successful",product))
+    .json(new ApiResponse(200,"Product fetched by category successful",true,product))
 })
 
 

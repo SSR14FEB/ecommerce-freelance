@@ -75,7 +75,7 @@ export const UserSchema = new Schema<IUserDocument>(
     addresses: { type: [AddressSchema], default: [] },
     cart: {
       type: [mongoose.Schema.Types.ObjectId],
-      ref: "Product",
+      ref: "Cart",
       default: [],
     },
     order: {

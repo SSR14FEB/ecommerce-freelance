@@ -1,7 +1,12 @@
 import mongoose,{Schema} from "mongoose"
 import { CartInterface } from "../types/models/cart-type-model"
+import { User } from "../models/user-model"
 
 export const CartSchema = new Schema<CartInterface>({
+    user:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"User"
+    },
     cartItem:{
         type:[{
             product_Id:{

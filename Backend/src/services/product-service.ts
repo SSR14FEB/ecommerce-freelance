@@ -8,7 +8,7 @@ import {
   UpdateProductMediaPayload,
 } from "../types/services/product-service-types";
 import { IUserDocument } from "../types/models/user-model-types";
-import { disconnect } from "process";
+
 
 const createProduct = async (
   sellerId: string,
