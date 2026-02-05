@@ -6,10 +6,10 @@ import { Request,Response } from "express";
 import { createPaymentIntent } from "../services/payment-service";
 
 
-// const createPaymentIntentController = asyncHandler(async(req:Request,res:Response)=>{
-// const {amount} = req.body;
-// const paymentIntent = await createPaymentIntent(amount as Number)
-// })
+const createPaymentIntentController = asyncHandler(async(req:Request,res:Response)=>{
+const { cartId } = req.body;
+const paymentIntent = await createPaymentIntent(cartId as string)
+})
 
 const verifyPaymentController  = asyncHandler(async(req:Request,res:Response)=>{
 
