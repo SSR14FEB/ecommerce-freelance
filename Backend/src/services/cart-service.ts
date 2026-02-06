@@ -4,7 +4,7 @@ import { CartInterface } from "../types/models/cart-type-model";
 import { ApiError } from "../utils/apiError";
 import { User } from "../models/user-model";
 import mongoose from "mongoose";
-import { types } from "util";
+import items from "razorpay/dist/types/items";
 
 const addToCart = async (
   user_id: string,
@@ -13,51 +13,43 @@ const addToCart = async (
 ): Promise<CartInterface> => {
   const product = await Product.findById(product_id);
   if (!product) {
-    throw new ApiError(404, "Product is not found", "");
+    throw new ApiError(404, "Product not found", "");
   }
-  const cart = await Cart.findOneAndUpdate(
-    {
-      user: user_id,
-      "cartItem.product_Id": product_id,
-    },
-    {
-      $inc: {
-        "cartItem.$.quantity": quantity,
-        subTotal: product.price * quantity,
-      },
-    },
-    {
-      new: true,
-    }
-  );
+  let price = product.price;
+  let cart = await Cart.findOne({ user: user_id });
+  const cartItem = {
+    product_Id: product.id,
+    product_name: product.productName,
+    quantity,
+    price,
+  };
   if (cart) {
+    const existingIndex = cart.cartItem.findIndex(
+      (item: any) => item.product_Id.toString() === product_id
+    );
+    if (existingIndex > -1) {
+      cart.cartItem[existingIndex].quantity += quantity;
+    } else {
+      cart.cartItem.push(cartItem);
+    }
+    cart.subTotal = cart.cartItem.reduce(
+      (total: number, item: any) => total + item.price * item.quantity,
+      0
+    );
+    await cart.save();
     return cart;
   }
-  const price = product.price;
-  const subTotal = product.price * quantity;
-  const cartItem = await Cart.create({
+  cart = await Cart.create({
     user: user_id,
-    cartItem: [
-      {
-        product_Id: product_id,
-        quantity,
-        price,
-      },
-    ],
-    subTotal,
+    cartItem: [cartItem],
+    subTotal: price * quantity,
   });
-
-  await User.findByIdAndUpdate(
-    { _id: user_id },
-    { cart: cartItem?._id },
-    { new: true }
-  );
-
-  return cartItem;
+  return cart;
 };
 
 const getCartItem = async (user_id: string): Promise<object> => {
-  const cart = await Cart.findOne({ user: user_id });
+  const cart = await Cart.find({ user: user_id });
+  console.log(cart);
   if (!cart) {
     throw new ApiError(404, "No product found in cart", "");
   }
@@ -81,13 +73,12 @@ const updateCart = async (
   cart_id: string,
   product_Id: string,
   deltaNum: number
-) => {
+): Promise<any> => {
   const query = {
     _id: cart_id,
     "cartItem.product_Id": product_Id,
   };
   const option = { new: true };
-
   const cart = await Cart.findOneAndUpdate(
     query,
     [
@@ -99,111 +90,63 @@ const updateCart = async (
               as: "item",
               in: {
                 $cond: [
-                  { $eq: ["$$item.product_Id", product_Id] },
                   {
-                    $mergeObjects: [
-                      "$$item",
-                      { quantity:deltaNum},
+                    $eq: [
+                      "$$item.product_Id",
+                      new mongoose.Types.ObjectId(product_Id),
                     ],
+                  },
+                  {
+                    $mergeObjects: ["$$item", { quantity: deltaNum }],
                   },
                   "$$item",
                 ],
               },
             },
           },
-          subTotal: {
-            $sum:{
-              $map:{
-                input:"$cartItem",
-                as:"item",
-                in:{
-                  $multiply:[
-                    "$$item.quantity",
-                    "$$item.price"
-                  ]
-                }
-              }
-            }
-          },
         },
       },
-    ],
-    option
-  );
-};
-
-const removeItemFromCart = async (cart_id: string, product_Id: string) => {
-  const cartListUpdate = await Cart.findOneAndUpdate(
-    { _id: cart_id },
-    [
       {
         $set: {
           subTotal: {
-            $subtract: [
-              "$subTotal",
-              {
-                $multiply: [
-                  {
-                    $first: {
-                      $map: {
-                        input: {
-                          $filter: {
-                            input: "$cartItem",
-                            as: "item",
-                            cond: {
-                              $eq: [
-                                "$$item.productId",
-                                new mongoose.Types.ObjectId(product_Id),
-                              ],
-                            },
-                          },
-                        },
-                        as: "item",
-                        in: "$$item.price",
-                      },
-                    },
-                  },
-                  {
-                    $first: {
-                      $map: {
-                        input: {
-                          $filter: {
-                            input: "$cartItem",
-                            as: "item",
-                            cond: {
-                              $eq: [
-                                "$$item.productId",
-                                new mongoose.Types.ObjectId(product_Id),
-                              ],
-                            },
-                          },
-                          as: "item",
-                          in: "$$item.quantity",
-                        },
-                      },
-                    },
-                  },
-                ],
-              },
-            ],
-          },
-          cartItem: {
-            $filter: {
-              input: "$cartItem",
-              as: "item",
-              cond: {
-                $ne: [
-                  "$$item.productId",
-                  new mongoose.Types.ObjectId(product_Id),
-                ],
+            $sum: {
+              $map: {
+                input: "$cartItem",
+                as: "item",
+                in: {
+                  $multiply: ["$$item.quantity", "$$item.price"],
+                },
               },
             },
           },
         },
       },
     ],
-    { new: true }
+    option
   );
-  return cartListUpdate
+  await cart?.save();
+  return cart;
 };
+
+const removeItemFromCart = async (
+  cart_id: string,
+  product_Id: string
+): Promise<any> => {
+  const cart = await Cart.findOne({ _id: cart_id });
+  // console.log(cart)
+  if (cart) {
+    const productObjectId = new mongoose.Types.ObjectId(product_Id);
+    console.log(productObjectId);
+    cart.cartItem = cart.cartItem.filter(
+      (item: any) => !item.product_Id.equals(productObjectId)
+    );
+    cart.subTotal = cart.cartItem.reduce(
+      (total: number, item: any) => total + item.quantity * item.price,
+      0
+    );
+    await cart.save();
+  }
+  return cart;
+};
+
 export { addToCart, getCartItem, updateCart, removeItemFromCart };

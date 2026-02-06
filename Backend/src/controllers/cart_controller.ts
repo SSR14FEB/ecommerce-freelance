@@ -37,7 +37,7 @@ const updateCartCartItemQuantityController = asyncHandler(
     const updatedCart = await updateCart(cart_id as string,product_id as string, deltaNum as number);
     return res
       .status(202)
-      .json(new ApiResponse(202, "Cart updated successful", true, updatedCart));
+      .json(new ApiResponse(202, "Cart updated successful", true, updatedCart||{}));
   }
 );
 
