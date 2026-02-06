@@ -133,7 +133,6 @@ const removeItemFromCart = async (
   product_Id: string
 ): Promise<any> => {
   const cart = await Cart.findOne({ _id: cart_id });
-  // console.log(cart)
   if (cart) {
     const productObjectId = new mongoose.Types.ObjectId(product_Id);
     console.log(productObjectId);
