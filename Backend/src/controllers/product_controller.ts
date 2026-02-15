@@ -9,9 +9,6 @@ import mongoose from "mongoose";
 import {redis} from "../config/redis-config"
 import { UpdateProductPayload, UpdateProductMediaPayload} from "../types/controllers/product-controller-type";
 
-
-
-
 const createProductController = asyncHandler(async(req:Request, res:Response)=>{
     const {id} = req.user as IUserDocument
     const product:ProductInterface = await createProduct(id as string,req.body as any, req.files as any)
@@ -113,7 +110,7 @@ const getProductByCategoryController = asyncHandler(async(req:Request, res:Respo
 const applyDiscountOnProductController = asyncHandler(async(req:Request ,res:Response)=>{
     const {productId,disc} = req.params;
     const discount = parseInt(disc as string,10);
-    const discountedProduct = await applyDiscountOnProduct(discount,productId)
+    const discountedProduct = await applyDiscountOnProduct(discount,productId as string)
     return res.status(201)
     .json(new ApiResponse(201,"Discount applied on product successful",true,discountedProduct))
 })

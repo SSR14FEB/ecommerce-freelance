@@ -1,26 +1,69 @@
-import mongoose,{Document} from "mongoose";
+import mongoose, { Document } from "mongoose";
 
-export interface Order {
+// Single item inside an order
+export interface OrderedItem {
   product_Id: mongoose.Types.ObjectId;
   quantity: number;
   price: number;
 }
 
-
+// Shipment details
 export interface ShipmentsInterface {
   trackingId?: string;
   carrier?: string;
+
   status: "PENDING" | "SHIPPED" | "IN_TRANSIT" | "DELIVERED" | "CANCELLED";
+
   shippedAt?: Date;
   deliveredAt?: Date;
-  user:mongoose.Types.ObjectId
+
   addressIndex: number;
 }
 
+// MAIN ORDER INTERFACE
 export interface OrderInterface extends Document {
-  ordered_Id: Order[];
+  userId: mongoose.Types.ObjectId;
+
+  orderedItems: OrderedItem[];
+
   totalPrice: number;
-  shipments: ShipmentsInterface;
+
+  // PAYMENT RELATED FIELDS
+  paymentId?: mongoose.Types.ObjectId;
+
+  razorpayOrderId?: string;
+
+  razorpayPaymentId?: string;
+
+  paymentStatus: "PENDING" | "PAID" | "FAILED" | "REFUNDED";
+
+  orderStatus:
+    | "CREATED"
+    | "CONFIRMED"
+    | "PROCESSING"
+    | "SHIPPED"
+    | "IN_TRANSIT"
+    | "DELIVERED"
+    | "CANCELLED"
+    | "RETURNED";
+    
+      refundStatus?:
+    | "NONE"
+    | "REFUND_REQUESTED"
+    | "REFUNDED_PROCESSING"
+    | "PARTIALLY_REFUNDED"
+    | "REFUNDED"
+    | "REFUND_FAILED"
+    | "REFUND_REJECTED";
+
+
+  // Multiple shipments possible
+  shipments: ShipmentsInterface[];
+  notes: string;
+  cancelledAt?: Date;
+  deliveredAt?: Date;
+  refundedAt?: Date;
+
   createdAt: Date;
-  updateAt: Date;
+  updatedAt: Date;
 }

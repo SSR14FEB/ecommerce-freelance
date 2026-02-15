@@ -17,6 +17,7 @@ const addToCart = async (
   }
   let price = product.price;
   let cart = await Cart.findOne({ user: user_id });
+
   const cartItem = {
     product_Id: product.id,
     product_name: product.productName,

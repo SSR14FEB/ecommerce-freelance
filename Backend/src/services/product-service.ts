@@ -94,7 +94,7 @@ const getProducts = async (
   pageNo: number,
   sortProducts: 1 | -1,
   sortByProductDate: 1 | -1
-): Promise<ProductInterface[]> => {
+) => {
   const limit = 20;
   const pageData = (pageNo - 1) * limit;
   const productData = await Product.find()
@@ -108,7 +108,7 @@ const getProducts = async (
   return productData;
 };
 
-const getProductById = async (id: string): Promise<ProductInterface> => {
+const getProductById = async (id: string) => {
   const product = await Product.findById(id).lean();
   if (!product) {
     throw new ApiError(404, "Product not found", "", [], false);
@@ -121,7 +121,7 @@ const getProductByName = async (
   pageNo: number,
   sortProducts: 1 | -1,
   sortByProductDate: 1 | -1
-): Promise<ProductInterface[]> => {
+) => {
   const limit = 20;
   const pageData = (pageNo - 1) * limit;
   const productData = await Product.find({
@@ -180,7 +180,7 @@ const updateProduct = async ({
   }
 
   const updatedProduct: ProductInterface | null =
-    await Product.findOneAndUpdate(query, updateQuery, option).lean();
+    await Product.findOneAndUpdate(query, updateQuery, option).lean() as ProductInterface | null;
 
   if (!updatedProduct) {
     throw new ApiError(404, "Product not found", "");

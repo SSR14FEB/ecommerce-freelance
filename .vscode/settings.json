@@ -3,6 +3,7 @@
         "CASHFREE",
         "maxlength",
         "PHONEPE",
+        "uuidv",
         "virtuals"
     ]
 }
