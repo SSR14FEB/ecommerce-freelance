@@ -27,7 +27,8 @@ export interface OrderInterface extends Document {
   orderedItems: OrderedItem[];
 
   totalPrice: number;
-
+  refundedQuantity?: number;
+  
   // PAYMENT RELATED FIELDS
   paymentId?: mongoose.Types.ObjectId;
 
@@ -35,7 +36,7 @@ export interface OrderInterface extends Document {
 
   razorpayPaymentId?: string;
 
-  paymentStatus: "PENDING" | "PAID" | "FAILED" | "REFUNDED";
+  paymentStatus: "PENDING" | "PAID" | "FAILED" | "REFUNDED"|"PARTIALLY_REFUNDED";
 
   orderStatus:
     | "CREATED"

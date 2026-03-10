@@ -12,11 +12,7 @@ const createPaymentIntentController = asyncHandler(async(req:Request,res:Respons
 const { cartId } = req.params;
 
 
-  https.get("https://api.razorpay.com/v1/payments", (res) => {
-    console.log("Internet Reachable:", res.statusCode);
-  }).on("error", (err) => {
-    console.log("Internet Blocked:", err.message);
-  });
+  
 
 if(!mongoose.Types.ObjectId.isValid(cartId as string)){
     throw new ApiError(400,"Payment is invalid","")
@@ -46,26 +42,24 @@ return res.status(200)
 })
 
 const refundPaymentController  = asyncHandler(async(req:Request,res:Response)=>{
-  const { orderId } = req.params;
-  if(!mongoose.Types.ObjectId.isValid(orderId as string)){
-    throw new ApiError(400,"Invalid orderId","")
+  const { orderId,productId,quantity,reason } = req.params;
+  if(!mongoose.Types.ObjectId.isValid(orderId as string) || !mongoose.Types.ObjectId.isValid(productId as string)){
+    throw new ApiError(400,"Invalid orderId or productId","")
   }
-  const result = await refundPayment(orderId as string);
+  const quantityNum = parseInt(quantity as string, 10)
+  console.log(quantityNum)
+  
+  await refundPayment(orderId as string, productId as string,quantityNum as number,reason as string  );
+  return res.status(200).json(new ApiResponse(200,"Payment refund processed",true))
 })
 
 const getPaymentStatusController  = asyncHandler(async(req:Request,res:Response)=>{
 
 })
-
-const retryPaymentController  = asyncHandler(async(req:Request,res:Response)=>{
-
-})
-
 export {
     createPaymentIntentController,
     verifyPaymentController,
     handlePaymentWebhookController,
     refundPaymentController,
     getPaymentStatusController,
-    retryPaymentController 
 }

@@ -36,7 +36,9 @@ export interface FeeBreakupInterface {
 export interface RefundItemInterface {
   amount: number;
   reason?: string;
-  providerRefundId?: string;
+  status: "pending" | "processed" | "failed";
+  providerRefundId?: string|null;
+  idempotencyKey?:string;
   createdAt: Date;
 }
 

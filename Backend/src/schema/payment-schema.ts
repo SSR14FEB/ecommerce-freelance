@@ -38,11 +38,24 @@ export const RefundItemSchema = new Schema<RefundItemInterface>(
       trim: true,
       maxlength: 256,
     },
+    status: {
+      type: String,
+      enum: ["pending", "processed", "failed"],
+      default: "pending",
+    },
     providerRefundId: {
       type: String,
-      required: true,
       trim: true,
       maxlength: 128,
+    },
+    idempotencyKey:{
+      type:String,
+      maxLength:128,
+      trim:true,
+      indexes:{
+        unique:true,
+        sparse:true,
+      }
     },
     createdAt: {
       type: Date,

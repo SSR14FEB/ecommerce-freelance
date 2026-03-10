@@ -11,7 +11,6 @@ class ApiError extends Error{
         success:boolean = false
     ){
         super(message)
-        this.message = message
         this.statuscode = statuscode
         this.stack = stack,
         this.error = error

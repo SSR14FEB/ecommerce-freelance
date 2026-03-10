@@ -9,6 +9,10 @@ import { verifyPaymentInterface } from "../types/services/payment-service-types"
 import crypto from "crypto";
 import { PaymentStatus } from "../types/models/payment-type-model";
 import { Order } from "../models/order-models";
+import { connectRabbitMQ } from "../config/rabbitMq-config";
+import { exists } from "fs-extra";
+import app from "../app";
+import { abort } from "process";
 
 const createPaymentIntent = async (
   cartId: string
@@ -23,7 +27,7 @@ const createPaymentIntent = async (
   }
 
   const amount = cart.subTotal;
- 
+
   if (!amount || amount <= 0) {
     throw new ApiError(400, "invalid car amount", "");
   }
@@ -34,9 +38,8 @@ const createPaymentIntent = async (
     receipt: `ord_${uuidv4().slice(0, 28)}`,
   };
 
- 
   const order = await razorpayInstance.orders.create(option);
-  
+
   if (!order) {
     throw new ApiError(500, "Order creation failed", "");
   }
@@ -168,32 +171,161 @@ const handlePaymentWebhook = async (event: any) => {
 
     return { order, payment };
   }
-  return {"message":"Unhandled payment"}
+  return { message: "Unhandled payment" };
 };
 
-const refundPayment = async (orderId:string) => {
-  const order = await Order.findById(orderId);
-  if(!order){
-    throw new ApiError(404,"Order not found","")
+const refundPayment = async (
+  orderId: string,
+  product_Id: string,
+  quantity: number,
+  reason: string
+) => {
+  const session = await mongoose.startSession();
+  let razorpayRefund: any = null;
+  const idempotencyKey = `${orderId}_${product_Id}_${quantity}`;
+
+  try {
+    session.startTransaction();
+
+    const orderedProduct = await Order.findOne({
+      _id: orderId,
+      "orderedItems.product_Id": product_Id,
+    }).session(session);
+
+    if (!orderedProduct) {
+      throw new ApiError(404, "Product not found in order", "");
+    }
+
+    if (
+      orderedProduct.orderStatus === "CANCELLED" ||
+      orderedProduct.orderStatus === "RETURNED"
+    ) {
+      throw new ApiError(400, "Product is not refundable", "");
+    }
+
+    const isEligible =
+      orderedProduct.paymentStatus === "PAID" ||
+      orderedProduct.refundStatus === "PARTIALLY_REFUNDED";
+
+    if (!isEligible) {
+      throw new ApiError(400, "Ordered product is not eligible for refund", "");
+    }
+
+    const product = orderedProduct.orderedItems.find(
+      (item: any) => item.product_Id.toString() === product_Id
+    );
+
+    if (!product) {
+      throw new ApiError(404, "Product not found in order", "");
+    }
+
+    const refundedQty = (product as any).refundedQuantity || 0;
+    const remainingQuantity = product.quantity - refundedQty;
+
+    if (remainingQuantity < quantity) {
+      throw new ApiError(400, "Invalid item quantity", "");
+    }
+
+    const refundableAmount = quantity * product.price;
+
+    const payment = await Payment.findById(orderedProduct.paymentId).session(
+      session
+    );
+
+    if (!payment) {
+      throw new ApiError(404, "Payment record not found", "");
+    }
+
+    const isExist = payment.refunds.find(
+      (refund: any) => refund.idempotencyKey === idempotencyKey
+    );
+
+    if (isExist) {
+      throw new ApiError(429, "Too many requests", "");
+    }
+
+    if (payment.totalRefunded + refundableAmount > payment.amount) {
+      throw new ApiError(400, "Refund amount exceeded", "");
+    }
+
+    payment.refunds.push({
+      providerRefundId: null,
+      amount: refundableAmount,
+      reason,
+      idempotencyKey,
+      status: "pending",
+      createdAt: new Date(),
+    });
+
+    await payment.save({ session });
+
+    await Order.findOneAndUpdate(
+      {
+        _id: orderId,
+        "orderedItems.product_Id": product_Id,
+      },
+      {
+        $inc: {
+          "orderedItems.$.refundedQuantity": quantity,
+        },
+      },
+      { session }
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+
+    // ---- Razorpay refund (outside transaction) ----
+
+    console.log("payment processed",payment.providerPaymentId);
+    razorpayRefund = await razorpayInstance.payments.refund(
+      payment.providerPaymentId,
+      {
+        amount: refundableAmount * 100,
+        speed: "optimum",
+        receipt: `refund_${uuidv4().slice(0, 28)}`,
+      }
+    );
+
+    await Payment.findOneAndUpdate(
+      {
+        _id: payment._id,
+        "refunds.idempotencyKey": idempotencyKey,
+      },
+      {
+        $set: {
+          "refunds.$.status": "processed",
+          "refunds.$.providerRefundId": razorpayRefund.id,
+        },
+        $inc: {
+          totalRefunded: refundableAmount,
+        },
+      }
+    );
+  } catch (error) {
+  if (session.inTransaction()) {
+   await session.abortTransaction();
+ }
+    session.endSession();
+
+    console.error("Refund failed:", error);
+
+    // Send retry job
+    connectRabbitMQ({
+      orderId,
+      productId: product_Id,
+      quantity,
+      reason,
+      idempotencyKey,
+    });
+
+    throw error;
   }
-  if(order.paymentStatus !== "PAID"){
-    throw new ApiError(400,"Only paid orders can be refunded","")
-  }
-  const payment = await Payment.findById(order.paymentId);
-  if(!payment){
-    throw new ApiError(404,"Payment record not found","")
-  }
-  const refund = await razorpayInstance.payments.refund(payment.providerPaymentId,{
-    amount: payment.amount * 100,
-    speed: "optimum",
-    receipt: `refund_${uuidv4().slice(0,28)}`
-  })
-  if(!refund){
-    throw new ApiError(500,"Refund failed","")
-  }
-  order.paymentStatus = "REFUNDED";
-  order.orderStatus = "CANCELLED";
-  await order.save();
-  return refund;  
-}
-export { createPaymentIntent, verifyPayment, handlePaymentWebhook, refundPayment };
+};
+
+export {
+  createPaymentIntent,
+  verifyPayment,
+  handlePaymentWebhook,
+  refundPayment,
+};

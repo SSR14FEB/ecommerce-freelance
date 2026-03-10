@@ -30,6 +30,11 @@ export const OrderSchema = new Schema<OrderInterface>(
             required: true,
             min: 0,
           },
+          refundedQuantity: {
+            type: Number,
+            default: 0,
+            min: 0,
+          },
         },
       ],
       default: [],
@@ -58,7 +63,7 @@ export const OrderSchema = new Schema<OrderInterface>(
 
     paymentStatus: {
       type: String,
-      enum: ["PENDING", "PAID", "FAILED", "REFUNDED"],
+      enum: ["PENDING", "PAID", "FAILED", "REFUNDED", "PARTIALLY_REFUNDED"],
       default: "PENDING",
       index: true,
     },
@@ -126,7 +131,6 @@ export const OrderSchema = new Schema<OrderInterface>(
     refundedAt: {
       type: Date,
     },
-
     notes: {
       type: String,
       maxlength: 500,
