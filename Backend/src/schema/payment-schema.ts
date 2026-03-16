@@ -28,7 +28,11 @@ export const FeeBreakupSchema = new Schema<FeeBreakupInterface>(
 
 export const RefundItemSchema = new Schema<RefundItemInterface>(
   {
-    amount: {
+    product_Id:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
+      index: true,
+    },amount: {
       type: Number,
       required: true,
       min: 0,

@@ -34,6 +34,7 @@ export interface FeeBreakupInterface {
 
 
 export interface RefundItemInterface {
+  product_Id: mongoose.Types.ObjectId;
   amount: number;
   reason?: string;
   status: "pending" | "processed" | "failed";

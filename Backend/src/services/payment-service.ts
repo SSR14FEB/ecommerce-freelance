@@ -186,7 +186,6 @@ const refundPayment = async (
 
   try {
     session.startTransaction();
-
     const orderedProduct = await Order.findOne({
       _id: orderId,
       "orderedItems.product_Id": product_Id,
@@ -236,28 +235,71 @@ const refundPayment = async (
       throw new ApiError(404, "Payment record not found", "");
     }
 
+    const refundStatus = payment.refunds.find(
+      (productRefund: any) => productRefund.product_Id.toString() === product_Id
+    )?.status;
+
+    if (refundStatus === "processed") {
+      throw new ApiError(400, "Refund already processed for this product", "");
+    }
+    // Check if any refund for this product has status 'confirmed'
+    const confirmedRefund = payment.refunds.find(
+      (refund: any) =>
+        refund.product_Id?.toString() === product_Id &&
+        refund.status === "confirmed"
+    );
+    if (confirmedRefund) {
+      throw new ApiError(400, "Refund already processed for this product", "");
+    }
+
     const isExist = payment.refunds.find(
       (refund: any) => refund.idempotencyKey === idempotencyKey
     );
 
-    if (isExist) {
-      throw new ApiError(429, "Too many requests", "");
+    const isPaymentFailed = payment.refunds.find(
+      (refund: any) =>
+        refund.product_Id?.toString() === product_Id &&
+        refund.status === "failed"
+    );
+
+    if (isExist && !isPaymentFailed) {
+      throw new ApiError(
+        429,
+        "Refund is  already initiated for this product",
+        ""
+      );
     }
 
     if (payment.totalRefunded + refundableAmount > payment.amount) {
       throw new ApiError(400, "Refund amount exceeded", "");
     }
+  const result = await Payment.findOneAndUpdate(
+      {
+        _id: payment._id,
+        "refunds.idempotencyKey": { $ne: idempotencyKey },
+      },
+      {
+        $push: {
+          refunds: {
+            product_Id: new mongoose.Types.ObjectId(product_Id),
+            providerRefundId: null,
+            amount: refundableAmount,
+            reason,
+            idempotencyKey,
+            status: "pending",
+            createdAt: new Date(),
+          },
+        },
+      },{session}
+    );
 
-    payment.refunds.push({
-      providerRefundId: null,
-      amount: refundableAmount,
-      reason,
-      idempotencyKey,
-      status: "pending",
-      createdAt: new Date(),
-    });
-
-    await payment.save({ session });
+    if (!result) {
+      throw new ApiError(
+        409,
+        "Refund is already initiated for this product",
+        ""
+      );
+    }
 
     await Order.findOneAndUpdate(
       {
@@ -277,7 +319,8 @@ const refundPayment = async (
 
     // ---- Razorpay refund (outside transaction) ----
 
-    console.log("payment processed",payment.providerPaymentId);
+    console.log("payment processed", payment.providerPaymentId);
+
     razorpayRefund = await razorpayInstance.payments.refund(
       payment.providerPaymentId,
       {
@@ -286,7 +329,31 @@ const refundPayment = async (
         receipt: `refund_${uuidv4().slice(0, 28)}`,
       }
     );
-
+    if (!razorpayRefund) {
+      await Payment.findOneAndUpdate(
+        {
+          _id: payment._id,
+          "refunds.idempotencyKey": idempotencyKey,
+        },
+        {
+          $set: {
+            "refunds.$.status": "failed",
+          },
+        }
+      );
+      await Order.findOneAndUpdate(
+        {
+          _id: orderId,
+          "orderedItems.product_Id": product_Id,
+        },
+        {
+          $inc: {
+            "orderedItems.$.refundedQuantity": -quantity,
+          },
+        }
+      );
+      throw new ApiError(500, "Refund failed with payment provider", "");
+    }
     await Payment.findOneAndUpdate(
       {
         _id: payment._id,
@@ -303,9 +370,9 @@ const refundPayment = async (
       }
     );
   } catch (error) {
-  if (session.inTransaction()) {
-   await session.abortTransaction();
- }
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+    }
     session.endSession();
 
     console.error("Refund failed:", error);
