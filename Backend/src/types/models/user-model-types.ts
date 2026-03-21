@@ -29,6 +29,7 @@ interface UserInterface {
   refreshToken: string;
   accessToken: string;
   otp?: string;
+  payment:mongoose.Types.ObjectId[],
   otpExpire?:Date|null;
   otpNextAttempt?:Date|null;
   otpMaxAttempts?:number;

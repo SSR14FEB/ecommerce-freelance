@@ -1,6 +1,5 @@
 import mongoose, { Document, Schema } from "mongoose";
 import { AddressInterface, IUserDocument, role } from "../types/models/user-model-types";
-import { Product } from "../models/product-model";
 export const AddressSchema = new Schema<AddressInterface>(
   {
     street: {
@@ -101,6 +100,10 @@ export const UserSchema = new Schema<IUserDocument>(
       type: Boolean,
       required: true,
       default: false,
+    },
+    payment:{
+      type:[mongoose.Schema.Types.ObjectId],
+      ref:"Payment"
     },
     refreshToken: {
       type: String,

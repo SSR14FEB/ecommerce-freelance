@@ -53,13 +53,17 @@ const refundPaymentController  = asyncHandler(async(req:Request,res:Response)=>{
   return res.status(200).json(new ApiResponse(200,"Payment refund processed",true))
 })
 
-const getPaymentStatusController  = asyncHandler(async(req:Request,res:Response)=>{
-
+const refundStatusController  = asyncHandler(async(req:Request,res:Response)=>{
+  const {refund_Id, payment_Id} = req.params;
+  if(!mongoose.Types.ObjectId.isValid(refund_Id as string)||!mongoose.Types.ObjectId.isValid(payment_Id as string)){
+    throw new ApiError(400,"Invalid payment id or refund id","")
+  }
+  const status 
 })
 export {
     createPaymentIntentController,
     verifyPaymentController,
     handlePaymentWebhookController,
     refundPaymentController,
-    getPaymentStatusController,
+    refundStatusController,
 }
