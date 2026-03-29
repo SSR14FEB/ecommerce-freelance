@@ -105,6 +105,10 @@ export const UserSchema = new Schema<IUserDocument>(
       type:[mongoose.Schema.Types.ObjectId],
       ref:"Payment"
     },
+    refund:{
+      type:[mongoose.Types.ObjectId],
+      ref:"Payment"
+    },
     refreshToken: {
       type: String,
     },

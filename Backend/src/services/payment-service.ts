@@ -4,6 +4,7 @@ import { ApiError } from "../utils/apiError";
 import { Cart } from "../models/cart-model";
 import mongoose from "mongoose";
 import { Payment } from "../models/payment-model";
+import {User} from "../models/user-model"
 import { PaymentDocInterface } from "../types/models/payment-type-model";
 import { verifyPaymentInterface } from "../types/services/payment-service-types";
 import crypto from "crypto";
@@ -389,10 +390,25 @@ const refundPayment = async (
     throw error;
   }
 };
-
+const refundStatus = async(payment_Id:string, refund_Id:string ,user_Id:string)=>{
+  const paymentInfo = await Payment.findOne({
+    id:payment_Id,
+    userId:user_Id,
+  })
+   if(!paymentInfo){
+    throw new ApiError(404,"Payment information not found","")
+  }
+  const refund = paymentInfo.refunds.find((refund:any)=>refund.providerRefundId===refund_Id)
+  if(!refund){
+    throw new ApiError(404,"Refund not found","")
+  }
+  const status = refund.status;
+  return status;
+}
 export {
   createPaymentIntent,
   verifyPayment,
   handlePaymentWebhook,
   refundPayment,
+  refundStatus
 };

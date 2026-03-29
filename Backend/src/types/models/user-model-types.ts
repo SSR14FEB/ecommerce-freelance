@@ -30,6 +30,7 @@ interface UserInterface {
   accessToken: string;
   otp?: string;
   payment:mongoose.Types.ObjectId[],
+  refund:mongoose.Types.ObjectId[],
   otpExpire?:Date|null;
   otpNextAttempt?:Date|null;
   otpMaxAttempts?:number;
