@@ -91,6 +91,23 @@ const resendOtpController = asyncHandler(
   }
 );
 
+const tokensGenerator = asyncHandler(async(req:Request,res:Response)=>{
+  const user = req.user 
+  if(!user){
+    throw new ApiError(400,"User is invalid","")
+  }
+  const {accessToken,refreshToken} = await generateTokens(user._id);
+  const options:AuthCookieOptions={
+    httpOnly:true,
+    secure:true,
+  }
+  return res.status(200)
+  .cookie("accessToken",accessToken,options)
+  .cookie("refreshToken",refreshToken,options)
+  .json(new ApiResponse(200,'Token refreshed successfully',true))
+
+})
+
 const logOutController = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.user as IUserDocument;
   await logOut(id as string);
@@ -109,4 +126,5 @@ export {
   verifyOtpController,
   resendOtpController,
   logOutController,
+  tokensGenerator
 };
