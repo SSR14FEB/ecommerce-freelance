@@ -23,6 +23,7 @@ export interface ProductInterface extends Document {
   weight:number;
   variant: VariantInterface[];
   sellerId:mongoose.Types.ObjectId;
+  review:mongoose.Types.ObjectId[];
   isFeatured: boolean;
   createdAt?: Date;
   updatedAt?: Date;

@@ -2,6 +2,7 @@ import { Schema } from "mongoose";
 import { VariantInterface } from "../types/models/product-model-type";
 import { ProductInterface } from "../types/models/product-model-type";
 import mongoose from "mongoose";
+import { types } from "util";
 const VariantSchema = new Schema<VariantInterface>(
   {
     images: {
@@ -67,8 +68,15 @@ export const ProductSchema = new Schema<ProductInterface>(
     isFeatured: { type: Boolean, default: false },
     sellerId:{
       type:mongoose.Schema.Types.ObjectId,
-      ref:"User"
-    }
+      ref:"User",
+      required:[true,"seller id is required"]
+    },
+    review:[
+      {
+        types:mongoose.Schema.Types.ObjectId,
+        ref:"ProductReview"
+      }
+    ]
   },
   { timestamps: true }
 );
