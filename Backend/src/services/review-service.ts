@@ -4,6 +4,7 @@ import { ProductReview } from "../models/reviews-model";
 import { ApiError } from "../utils/apiError";
 import { Filter } from "bad-words";
 
+
 const createUserReview = async(product_Id:string, user_Id:string, review:string)=>{
    const isExisted = await ProductReview.findOne({
     user:user_Id,
@@ -22,6 +23,11 @@ const createUserReview = async(product_Id:string, user_Id:string, review:string)
     return newReview
 }
 
+const updateUserReview = async(user_Id:string, product_Id:string)=>{
+
+}
+
 export {
-    createUserReview
+    createUserReview,
+    updateUserReview
 }

@@ -3,8 +3,27 @@ import { ApiResponse } from "../utils/apiResponse";
 import { ApiError } from "../utils/apiError";
 import { Response, Request } from "express";
 import mongoose from "mongoose";
+import { createUserReview, updateUserReview } from "../services/review-service";
+import { redis } from "../config/redis-config";
+import { json } from "stream/consumers";
 
-import { createUserReview } from "../services/review-service";
+const getUserReviewController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const product_Id = req.params;
+    const cacheKey = product_Id;
+    const usersReviews = await redis.get(JSON.stringify(cacheKey));
+    if (!usersReviews) {
+      throw new ApiError(404, "There is no review of this product", "");
+    }
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, "All users review of this product", true, {
+          usersReviews,
+        })
+      );
+  }
+);
 
 const createUserReviewController = asyncHandler(
   async (req: Request, res: Response) => {
@@ -25,6 +44,9 @@ const createUserReviewController = asyncHandler(
       throw new ApiError(500, "Failed to create review", "");
     }
 
+    const cacheKey = product_Id;
+    await redis.set(cacheKey, JSON.stringify(newReview));
+
     return res
       .status(200)
       .json(
@@ -38,9 +60,21 @@ const createUserReviewController = asyncHandler(
   }
 );
 
-const updateUserReviewController = asyncHandler(
-  async (req: Request, res: Response) => {}
-);
+const updateUserReviewController = asyncHandler(async (req: Request, res: Response) => {
+const {user_Id, product_Id} = req.body
+if(mongoose.Types.ObjectId.isValid(user_Id)||mongoose.Types.ObjectId.isValid(product_Id)){
+  throw new ApiError(400,"Invalid user or product","");
+}
+const updatedUserReview = await updateUserReview(user_Id as string, product_Id as string)
+if(!updateUserReview){
+  throw new ApiError(400,"Review update failed ","")
+}
+const cacheKey = product_Id;
+const updatedCachedReview = redis.set(cacheKey,JSON.stringify(updatedUserReview))
+return res.status(200)
+.json(new ApiResponse(200,"User review updated successfully",true,{updatedCachedReview}))
+
+});
 
 const deleteUserReviewController = asyncHandler(
   async (req: Request, res: Response) => {}
@@ -51,6 +85,7 @@ const replyToReviewController = asyncHandler(
 );
 
 export {
+  getUserReviewController,
   createUserReviewController,
   updateUserReviewController,
   deleteUserReviewController,
