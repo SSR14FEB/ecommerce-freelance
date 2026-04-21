@@ -19,5 +19,8 @@
     },
     comments:{
       type:String
+    },
+    reply:{
+      type:String
     }
   },{timestamps:true})

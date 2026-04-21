@@ -5,6 +5,7 @@ export interface ProductReviewsInterface{
     product:mongoose.Types.ObjectId;
     rating:number;
     comments:string;
+    reply:string;
     createdAt?:Date;
     updatedAt?:Date
   }
