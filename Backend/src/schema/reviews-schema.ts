@@ -17,7 +17,7 @@
       max:5,
       required:true
     },
-    comments:{
+    comment:{
       type:String
     },
     reply:{

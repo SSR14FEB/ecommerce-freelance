@@ -4,7 +4,7 @@ export interface ProductReviewsInterface{
     user:mongoose.Types.ObjectId;
     product:mongoose.Types.ObjectId;
     rating:number;
-    comments:string;
+    comment:string;
     reply:string;
     createdAt?:Date;
     updatedAt?:Date

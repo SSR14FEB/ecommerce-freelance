@@ -38,7 +38,7 @@ const updateUserReview = async (
     },
     {
       $set: {
-        comments: newComment,
+        comment: newComment,
       },
     },
     { new: true }
