@@ -1,5 +1,3 @@
-import { Product } from "../models/product-model";
-import { User } from "../models/user-model";
 import { ProductReview } from "../models/reviews-model";
 import { ApiError } from "../utils/apiError";
 import { Filter } from "bad-words";
@@ -54,9 +52,15 @@ const updateUserReview = async (
 };
 
 const replyToReview = async (
-  userId: string,
   review_id: string,
-  product_Id: string,
   reply: string
-) => {};
+) => {
+  const review = await ProductReview.findById(review_id)
+  if(!review){
+    throw new ApiError(404,"There is no review","");
+  }
+  review.reply = reply;
+  await review.save();
+  return review;
+};
 export { createUserReview, updateUserReview, replyToReview };

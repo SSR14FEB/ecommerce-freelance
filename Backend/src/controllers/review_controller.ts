@@ -109,7 +109,8 @@ const replyToReviewController = asyncHandler(async (req: Request, res: Response)
     if(!mongoose.Types.ObjectId.isValid(userId)||!mongoose.Types.ObjectId.isValid(review_id)||!mongoose.Types.ObjectId.isValid(product_Id)){
       throw new ApiError(400,"Invalid product or user id","");
     }
-    const reviewReply = await replyToReview(userId as string, review_id as string, product_Id as string, reply as string ) 
+    const reviewReply = await replyToReview( review_id as string, reply as string ) 
+
     if(!reviewReply){
       throw new ApiError(400,"Failed to add reply to review","");
     }
