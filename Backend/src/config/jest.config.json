@@ -1,0 +1,7 @@
+// tsconfig.jest.json — same folder as tsconfig.json
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "."
+  }
+}
