@@ -6,9 +6,10 @@
     "rootDir": "./src",
     "outDir": "./dist",
     "lib": ["esnext"],
-    "types": ["node","jest"],
+    "types": ["node", "jest"],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "strict": true
-  }}
+  }
+}
