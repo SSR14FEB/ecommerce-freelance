@@ -4,15 +4,13 @@ import { ApiError } from "../utils/apiError";
 import { Response, Request } from "express";
 import mongoose from "mongoose";
 import { createUserReview, updateUserReview,replyToReview } from "../services/review-service";
-import { redis } from "../config/redis-config";
 import { ProductReview } from "../models/reviews-model";
 
 const getUserReviewController = asyncHandler(
   async (req: Request, res: Response) => {
-    const product_Id = req.params;
-    const cacheKey = `Product:${product_Id}:review`;
-    const usersReviews = await redis.get(JSON.stringify(cacheKey));
-    if (!usersReviews) {
+    const { product_Id } = req.params;
+    const usersReviews = await ProductReview.find({ product: product_Id });
+    if (usersReviews.length === 0) {
       throw new ApiError(404, "There is no review of this product", "");
     }
     return res
@@ -44,9 +42,7 @@ const createUserReviewController = asyncHandler(
       throw new ApiError(500, "Failed to create review", "");
     }
 
-    const cacheKey = `Product:${product_Id}:review`;
-    await redis.del(cacheKey)
-    await redis.set(cacheKey, JSON.stringify(newReview));
+    // Redis cache invalidation is temporarily disabled.
 
     return res
       .status(200)
@@ -72,23 +68,9 @@ const updatedUserReview = await updateUserReview(user_Id as string, product_Id a
 if(!updateUserReview){
   throw new ApiError(400,"Review update failed ","")
 }
-const cacheKey = `Product:${product_Id}:review`;
-const data = await redis.get(cacheKey);
-const prevReview = data ? JSON.parse(data) : [];
-
-if(prevReview.length>0){
-  const updatedCache = prevReview.map((r:any)=>{
-    r.user_Id == user_Id?updateUserReview:r
-  })
-  await redis.set(cacheKey,updatedCache)
-}
-
-const updatedCachedReview = await redis.set(
-  cacheKey,
-  JSON.stringify(updatedUserReview)
-);
+// Redis cache update is temporarily disabled.
 return res.status(200)
-.json(new ApiResponse(200,"User review updated successfully",true,{updatedCachedReview}))
+.json(new ApiResponse(200,"User review updated successfully",true,updatedUserReview))
 
 });
 

@@ -6,7 +6,7 @@ import { Request,Response } from "express";
 import { IUserDocument } from "../types/models/user-model-types";
 import { createProduct, getProducts, getProductById, getProductByName, updateProduct, updateProductMedia, deleteProduct,productByCategory,applyDiscountOnProduct} from "../services/product-service";
 import mongoose from "mongoose";
-import {redis} from "../config/redis-config"
+// import {redis} from "../config/redis-config"
 import { UpdateProductPayload, UpdateProductMediaPayload} from "../types/controllers/product-controller-type";
 
 const createProductController = asyncHandler(async(req:Request, res:Response)=>{
@@ -27,14 +27,14 @@ const getAllProductsController = asyncHandler(async(req:Request, res:Response)=>
     const sortProducts = (parseInt(sort as string,10)=== -1?-1:1) as 1|-1
     const sortByProductDate = (parseInt(newestFirst as string,10)===-1?-1:1) as 1|-1
     
-    const cacheKey = `PageNumber:4{pageNo}:${sort}:${newestFirst}`
-    const cachedPage = await redis.get(cacheKey)
-    if(cachedPage){
-        return res.status(200)
-        .json(new ApiResponse(200,"product fetched successfully",true,JSON.parse(cachedPage)))
-    }
+    // const cacheKey = `PageNumber:4{pageNo}:${sort}:${newestFirst}`
+    // const cachedPage = await redis.get(cacheKey)
+    // if(cachedPage){
+    //     return res.status(200)
+    //     .json(new ApiResponse(200,"product fetched successfully",true,JSON.parse(cachedPage)))
+    // }
     const products:Object = await getProducts(pageNumber, sortProducts, sortByProductDate)
-    await redis.set(cacheKey,JSON.stringify(products),"EX",60)
+    // await redis.set(cacheKey,JSON.stringify(products),"EX",60)
     return res.status(200)
     .json(new ApiResponse(200,"product fetched successfully",true,products))
 })
@@ -52,15 +52,10 @@ const getProductByNameController = asyncHandler(async(req:Request, res:Response)
      const sortProducts = (parseInt(sort as string, 10)===-1?-1:1) as -1|1
      const sortByProductDate = (parseInt(sort as string, 10)===-1?-1:1) as -1|1
 
-     const cacheKey = `Product:${name}:${pageNo}:${sort}:${newestFirst}`
-     const cachedProduct = await redis.get(cacheKey)
-     if(cachedProduct){
-        return res.status(200)
-        .json(new ApiResponse(200,"Product fetched successfully",true,JSON.parse(cachedProduct)))
-     }
+     // Redis lookup is temporarily disabled.
 
      const product:Object = await getProductByName(name as string,pageNumber,sortProducts,sortByProductDate)
-     await redis.set(cacheKey,JSON.stringify(product),"EX",60)
+     // Redis cache write is temporarily disabled.
     return res.status(200)
     .json(new ApiResponse(200,"Product fetched successfully",true,product))
 }) 
