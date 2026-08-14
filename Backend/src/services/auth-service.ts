@@ -91,7 +91,7 @@ const sendOtp = async (data: UserOtpPayload): Promise<IUserDocument> => {
   user.otpExpire = new Date(Date.now() + 60 * 1000);
   const otp = String(user.otp);
   console.log(otp);
-  // await sendSMS(contactNumber, otp);
+  await sendSMS(contactNumber, otp);
   await user?.save();
   return user;
 };
