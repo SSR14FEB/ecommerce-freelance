@@ -73,7 +73,7 @@ export const ProductSchema = new Schema<ProductInterface>(
     },
     review:[
       {
-        types:mongoose.Schema.Types.ObjectId,
+        type:mongoose.Schema.Types.ObjectId,
         ref:"ProductReview"
       }
     ]
