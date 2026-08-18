@@ -2,14 +2,13 @@ import { asyncHandler } from "../utils/asyncHandler";
 import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
 import { Request, Response } from "express";
-import "../types/global/global"
+import "../types/global/global";
 import {
   sendOtp,
   verifyOtp,
   resendOtp,
   logOut,
 } from "../services/auth-service";
-
 
 import mongoose from "mongoose";
 import { User } from "../models/user-model";
@@ -44,11 +43,17 @@ const generateTokens = async (
 
 const sendOtpController = asyncHandler(
   async (req: Request<{}, {}, SendOtpPayload>, res: Response) => {
-    const user = await sendOtp(req.body);
+    const { user, smsResponse } = await sendOtp(req.body);
+    const { contactNumber } = user;
+    console.log({ smsResponse });
     return res
       .status(200)
       .json(
-        new ApiResponse(200, `OTP sent to the ${user.contactNumber}`, true)
+        new ApiResponse(
+          200,
+          `OTP service is currently unavailable. For development, the OTP for ${contactNumber} is ${smsResponse}.`,
+          true
+        )
       );
   }
 );
@@ -91,22 +96,22 @@ const resendOtpController = asyncHandler(
   }
 );
 
-const tokensGenerator = asyncHandler(async(req:Request,res:Response)=>{
-  const user = req.user 
-  if(!user){
-    throw new ApiError(400,"User is invalid","")
+const tokensGenerator = asyncHandler(async (req: Request, res: Response) => {
+  const user = req.user;
+  if (!user) {
+    throw new ApiError(400, "User is invalid", "");
   }
-  const {accessToken,refreshToken} = await generateTokens(user._id);
-  const options:AuthCookieOptions={
-    httpOnly:true,
-    secure:true,
-  }
-  return res.status(200)
-  .cookie("accessToken",accessToken,options)
-  .cookie("refreshToken",refreshToken,options)
-  .json(new ApiResponse(200,'Token refreshed successfully',true))
-
-})
+  const { accessToken, refreshToken } = await generateTokens(user._id);
+  const options: AuthCookieOptions = {
+    httpOnly: true,
+    secure: true,
+  };
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(new ApiResponse(200, "Token refreshed successfully", true));
+});
 
 const logOutController = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.user as IUserDocument;
@@ -126,5 +131,5 @@ export {
   verifyOtpController,
   resendOtpController,
   logOutController,
-  tokensGenerator
+  tokensGenerator,
 };

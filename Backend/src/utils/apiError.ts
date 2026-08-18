@@ -6,7 +6,7 @@ class ApiError extends Error{
     constructor(
         statuscode:number|500,
         message:string = "Something went wrong",
-        stack:string|"",
+        stack?:string|"",
         error:string[] = [],
         success:boolean = false
     ){

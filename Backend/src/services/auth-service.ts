@@ -43,7 +43,7 @@ const handleOtpAttempts = async (user: IUserDocument) => {
  * @returns Updated user document with OTP state
  * @throws ApiError if blocked/cool-down rules violated
  */
-const sendOtp = async (data: UserOtpPayload): Promise<IUserDocument> => {
+const sendOtp = async (data: UserOtpPayload): Promise<any> => {
   // This (send otp), service is to generate and send otp to the user numbers
   const contactNumber: string = data.contactNumber;
   let user: IUserDocument | null = await User.findOne({
@@ -91,9 +91,12 @@ const sendOtp = async (data: UserOtpPayload): Promise<IUserDocument> => {
   user.otpExpire = new Date(Date.now() + 60 * 1000);
   const otp = String(user.otp);
   console.log(otp);
-  await sendSMS(contactNumber, otp);
+  const smsResponse = await sendSMS(contactNumber, otp);
   await user?.save();
-  return user;
+  return {
+    user,
+    smsResponse
+  };
 };
 
 /**
